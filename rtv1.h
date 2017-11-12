@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   rtv1.h                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <notraore@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:06:37 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/03 16:51:51 by notraore         ###   ########.fr       */
+/*   Updated: 2017/11/12 19:10:28 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef RTV1_H
 # define RTV1_H
 
-# define WIDTH 800
-# define HEIGHT 600
+# define WIDTH 1000
+# define HEIGHT 1000
 
 # define BLUE 0x0000FF
 # define FBLUE 0x00BFFF
@@ -83,6 +83,7 @@ struct 						s_all
 
 	int						x;
 	int						y;
+	double					d;
 	double					delta;
 };
 

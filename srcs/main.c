@@ -3,16 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <notraore@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:07:14 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/07 14:47:19 by notraore         ###   ########.fr       */
+/*   Updated: 2017/11/12 19:37:04 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../rtv1.h"
 
+t_v			create_vector(double x, double y, double z)
+{
+	t_v		ret;
 
+	ret.x = x;
+	ret.y = y;
+	ret.z = z;
+	return (ret);
+}
 
 t_cam		init_cam(double x, double y, double z)
 {
@@ -74,20 +82,42 @@ bool		cast_sphere(t_all *all)
 	c = ((oc.x * oc.x) + (oc.y * oc.y) + (oc.z * oc.z)) - all->sph.r * all->sph.r;
 
 	all->delta = b * b - 4 * a * c;
-	if (all->delta == 0)
+	if (all->delta >= 0)
 		return (true);
 	return (false);
 }
 
-// bool		cast_plan(t_all *all)
-// {
+bool		create_plan(t_all *all)
+{
+	double a;
+	double b;
+	double s;
 
-// }
+	t_v		plan_pos;
+	t_v		plan_cam;
+	t_v		normal;
+
+	normal = create_vector(0, 1, 0);
+	plan_pos = create_vector(100, 100, 650);
+	vector_sub(&all->camera.cam_pos, &plan_pos, &plan_cam);
+
+	a = dot_product(&normal, &all->ray.pos);
+	b = dot_product(&normal, &plan_cam);
+	if (b == 0)
+		return (false);
+	s = -(b / a);
+	if (s < 0)
+		return (false);
+	else
+	{
+		all->d = s;
+		return (true);
+	}
+}
 
 void		raytracing(t_all *all)
 {
 	all->y = 0;
-
 	while (all->y <= HEIGHT)
 	{
 		all->x = 0;
@@ -96,17 +126,16 @@ void		raytracing(t_all *all)
 			all->ray = init_ray(all);
 			if (cast_sphere(all) == true)
 				all->env->data[all->x + all->y * WIDTH] = RED;
+			// if (create_plan(all) == true)
+			// 	all->env->data[all->x + all->y * WIDTH] = BLUE;
 			all->x++;
 		}
 		all->y++;
 	}
 }
 
-int			main(int argc, char **argv)
+int			main(void)
 {
-	(void)argc;
-	(void)argv;
-
 	t_mlx		mlx;
 	t_all		all;
 
@@ -117,11 +146,11 @@ int			main(int argc, char **argv)
 	all.env->data = (int *)mlx_get_data_addr(all.env->img, &all.env->bpp,
 	&all.env->sl, &all.env->end);
 
-	all.camera = init_cam((double)WIDTH / 2, (double)HEIGHT / 2, -400);
+	all.camera = init_cam((double)WIDTH / 2, (double)HEIGHT / 2, -500);
 	printf("all.cam.x = %f\n", all.camera.cam_pos.x);
 	printf("all.cam.y = %f\n", all.camera.cam_pos.y);
 
-	all.sph = create_sphere(400, 300, 50, 200);
+	all.sph = create_sphere(500, 500, 350, 100);
 	raytracing(&all);
 
 	mlx_put_image_to_window(all.env->mlx, all.env->win, all.env->img, 0, 0);
