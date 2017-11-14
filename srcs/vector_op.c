@@ -12,11 +12,14 @@
 
 #include "../rtv1.h"
 
-void		vector_sub(t_v *start, t_v *end, t_v *new)
+t_v							vector_sub(t_v *start, t_v *end)
 {
-	new->x = end->x - start->x;
-	new->y = end->y - start->y;
-	new->z = end->z - start->z;
+	t_v		new;
+
+	new.x = end->x - start->x;
+	new.y = end->y - start->y;
+	new.z = end->z - start->z;
+	return (new);
 }
 
 void		vector_add(t_v *base, t_v *add, t_v *new)

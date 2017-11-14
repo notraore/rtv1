@@ -16,10 +16,11 @@
 # define WIDTH 1000
 # define HEIGHT 1000
 
-# define BLUE 0x0000FF
+# define BLUE 0x0099FF
 # define FBLUE 0x00BFFF
 # define GREY 0x424242
 # define RED 0xFF0000
+# define BLACK 0x000000
 # define WHITE 0xFFFFFF
 # define YELLOW 0xFFFF00
 # define GREEN 0x00FF00
@@ -36,6 +37,7 @@ typedef struct s_all		t_all;
 typedef struct s_ray		t_ray;
 typedef struct s_sph		t_sph;
 typedef struct s_cam		t_cam;
+typedef struct s_plan		t_plan;
 
 struct						s_mlx
 {
@@ -61,6 +63,13 @@ struct						s_sph
 	double					r;
 };
 
+struct						s_plan
+{
+	t_v						pos;
+	t_v						normal;
+	t_v						plan_cam;
+};
+
 struct						s_ray
 {
 	t_v						pos;
@@ -79,10 +88,17 @@ struct 						s_all
 	t_mlx					*env;
 	t_cam					camera;
 	t_ray					ray;
+	t_plan					plan;
 	t_sph					sph;
+	t_sph					sph2;
 
 	int						x;
 	int						y;
+	double					t;
+	double					t1;
+	double					dist;
+	int						clr;
+	double					t2;
 	double					d;
 	double					delta;
 };
@@ -109,7 +125,7 @@ double						vector_mult(t_v *base);
 /*
 ** vector_op.c
 */
-void						vector_sub(t_v *start, t_v *end, t_v *new);
+t_v							vector_sub(t_v *start, t_v *end);
 void						vector_add(t_v *base, t_v *add, t_v *new);
 double						vector_len(t_v *len);
 double						vector_colineaire(double a, double b, double c);
