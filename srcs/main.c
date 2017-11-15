@@ -44,10 +44,6 @@ t_ray		init_ray(t_all *all, int x1, int y1)
 	all->camera.vp.x = x1;
 	all->camera.vp.y = y1;
 
-	// ray.dir.x = ray.pos.x - all->camera.vp.x;
-	// ray.dir.y = ray.pos.y - all->camera.vp.y;
-	// ray.dir.z = ray.pos.z - all->camera.vp.z;
-
 	ray.dir.x = all->camera.vp.x - ray.pos.x;
 	ray.dir.y = all->camera.vp.y - ray.pos.y;
 	ray.dir.z = all->camera.vp.z - ray.pos.z;
@@ -143,6 +139,7 @@ bool		cast_plan(t_all *all)
 	double	a;
 	double	b;
 	double	s;
+
 	oc = vector_sub(&all->plan.pos, &all->camera.cam_pos);
 	a = dot_product(&all->plan.normal, &oc);
 	b = dot_product(&all->plan.normal, &all->ray.dir);
@@ -153,36 +150,116 @@ bool		cast_plan(t_all *all)
 	return (true);
 }
 
-// t_spot		create_spot(double x, double y, double z, double intens)
-// {
-// 	t_spot	spot;
+t_spot		create_spot(double x, double y, double z, double intens)
+{
+	t_spot	spot;
 
-// 	spot.pos = create_vector(x, y, z);
-// 	spot.intens = intens;
-// 	return (spot);
+	spot.pos = create_vector(x, y, z);
+	spot.ray.pos = create_vector(x, y, z);
+	spot.intens = intens;
+	return (spot);
+}
+
+t_color			create_color(double r, double g, double b)
+{
+	t_color	clr;
+
+	clr.r = r;
+	clr.g = g;
+	clr.b = b;
+	return (clr);
+}
+
+// t_color			cast_light(t_all *all)
+// {
+// 	t_v			hit;
+// 	t_v			normal;
+// 	t_color		clr;
+// 	double		d;
+
+// 	hit = vector_add(&all->ray.pos, &all->ray.dir);
+// 	// printf("hit = %f || hit = %f || hit = %f\n", hit.x, hit.y, hit.z);
+// 	vector_mult_scal(&hit, all->t);
+// 	normal = vector_sub(&all->sph.pos, &hit);
+// 	normal = vector_normalize(&normal);
+// 	all->spot.dir = vector_sub(&hit, &all->spot.pos);
+// 	all->spot.dir = vector_normalize(&all->spot.dir);
+
+// 	d = dot_product(&normal, &all->spot.dir);
+
+// 	if (d < 0)
+// 		d = 0;
+// 	// clr.r = all->sph.clr.r * all->spot.clr.r * d;
+// 	// clr.g = all->sph.clr.g * all->spot.clr.g * d;
+// 	// clr.b = all->sph.clr.b * all->spot.clr.b * d;
+// 	clr.r = all->sph.clr.r * d;
+// 	clr.g = all->sph.clr.g * d;
+// 	clr.b = all->sph.clr.b * d;
+// 	return (clr);
 // }
 
-// int		plane_intersection(t_datas *d)
-// {
-// 	double		a;
-// 	double		b;
-// 	double		s;
-// 	t_vector	plan_cam;
+t_color			cast_light2(t_all *all)
+{
+	t_v			hit;
+	t_v			normal;
+	t_color		clr;
+	double		d;
 
-// 	plan_cam = v_v_subs(&d->camera.origin, &d->plane.point);
-// 	a = dot_product(&d->plane.normal, &d->camera.rayon);
-// 	b = dot_product(&d->plane.normal, &plan_cam);
-// 	if (b == 0)
-// 		return (0);
-// 	s = -(b / a);
-// 	if (s < 0)
-// 		return (0);
-// 	else 
-// 	{
-// 		d->solution = s;
-// 		return (1);
-// 	}
+	// printf("hit = %f || hit = %f || hit = %f\n", hit.x, hit.y, hit.z);
+	hit = vector_add(&all->ray.pos, &all->ray.dir);
+	// vector_mult_scal(&hit, all->t);
+	normal = vector_sub(&all->sph2.pos, &hit);
+	normal = vector_normalize(&normal);
+	all->spot.ray.dir = vector_sub(&all->spot.pos, &hit);
+	all->spot.ray.dir = vector_normalize(&all->spot.ray.dir);
+
+	d = dot_product(&normal, &all->spot.ray.dir);
+
+	if (d < 0)
+	{
+		d = 0;
+		// return (create_color(0, 0, 0));
+	}
+	clr.r = all->spot.clr.r * all->sph2.clr.r * d;
+	clr.g = all->spot.clr.g * all->sph2.clr.g * d;
+	clr.b = all->spot.clr.b * all->sph2.clr.b * d;
+	return (clr);
+}
+
+// t_color			cast_light3(t_all *all)
+// {
+// 	t_v			hit;
+// 	t_v			normal;
+// 	t_color		clr;
+// 	double		d;
+
+// 	hit = vector_add(&all->ray.pos, &all->ray.dir);
+// 	// printf("hit = %f || hit = %f || hit = %f\n", hit.x, hit.y, hit.z);
+// 	vector_mult_scal(&hit, all->t);
+// 	normal = vector_sub(&all->plan.pos, &hit);
+// 	normal = vector_normalize(&normal);
+// 	all->spot.dir = vector_sub(&hit, &all->spot.pos);
+// 	all->spot.dir = vector_normalize(&all->spot.dir);
+
+// 	d = dot_product(&normal, &all->spot.dir);
+
+// 	if (d < 0)
+// 		d = 0;
+// 	// clr.r = all->sph.clr.r * all->spot.clr.r * d;
+// 	// clr.g = all->sph.clr.g * all->spot.clr.g * d;
+// 	// clr.b = all->sph.clr.b * all->spot.clr.b * d;
+// 	clr.r = all->plan.clr.r * d;
+// 	clr.g = all->plan.clr.g * d;
+// 	clr.b = all->plan.clr.b * d;
+// 	return (clr);
 // }
+
+void		pixel_puts(t_color *clr, t_all *all)
+{
+	all->env->data[(all->x + all->y * WIDTH) * 4] = clr->b;
+	all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = clr->g;
+	all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = clr->r;
+}
 
 
 void		raytracing(t_all *all)
@@ -191,42 +268,44 @@ void		raytracing(t_all *all)
 	int y1;
 
 	all->y = 0;
+	t_color clr;
 	y1 = (HEIGHT / 2);
-	while (all->y <= HEIGHT)
+	while (all->y < HEIGHT)
 	{
 		all->x = 0;
 		x1 = -(WIDTH / 2);
-		while (all->x <= WIDTH)
+		while (all->x < WIDTH)
 		{
 			all->dist = 20000;
-			all->clr = BLACK;
 			all->ray = init_ray(all, x1, y1);
-			if (cast_sphere(all) == true)
-			{
-				if (all->dist > all->t)
-				{
-					all->clr = RED;
-					all->dist = all->t;
-				}
-			}
+			// if (cast_sphere(all) == true)
+			// {
+			// 	if (all->dist > all->t)
+			// 	{
+			// 		all->dist = all->t;
+			// 		clr = cast_light(all);
+			// 		pixel_puts(&clr, all);
+			// 	}
+			// }
 			if (cast_sphere2(all) == true)
 			{
 				if (all->dist > all->t)
 				{
-					all->clr = BLUE / 2;
 					all->dist = all->t;
+					clr = cast_light2(all);
+					pixel_puts(&clr, all);
 				}
 			}
-			if (cast_plan(all) == true)
-			{
-				if (all->dist > all->t)
-				{
-					all->clr = GREY;
-					all->dist = all->t;
-				}
-			}
-			if (all->x > 0 && all->x < WIDTH && all->y >= 0 && all->y < HEIGHT)
-				all->env->data[all->x + all->y * WIDTH] = all->clr;
+			// if (cast_plan(all) == true)
+			// {
+			// 	if (all->dist > all->t)
+			// 	{
+			// 		all->dist = all->t;
+			// 		clr = cast_light3(all);
+			// 		pixel_puts(&clr, all);
+			// 	}
+			// }
+			// clr = create_color(0, 0, 0);
 			all->x++;
 			x1++;
 		}
@@ -244,14 +323,18 @@ int			main(void)
 	all.env->mlx = mlx_init();
 	all.env->win = mlx_new_window(all.env->mlx, WIDTH, HEIGHT, "RTv1");
 	all.env->img = mlx_new_image(all.env->mlx, WIDTH, HEIGHT);
-	all.env->data = (int *)mlx_get_data_addr(all.env->img, &all.env->bpp,
+	all.env->data = mlx_get_data_addr(all.env->img, &all.env->bpp,
 	&all.env->sl, &all.env->end);
 
 	all.camera = init_cam(0, 0, -1000);
-	// all.spot.pos = create_spot(-400, 400, 10, 10);
-	all.sph = create_sphere(-100, -80, 300, 90);
-	all.sph2 = create_sphere(0, -80, 300, 90);
+	all.spot = create_spot(-20, 350, -100, 10);
+	all.spot.clr = create_color(155.9, 155.9, 155.9);
+	all.sph = create_sphere(-200, 10, 5, 190);
+	all.sph.clr = create_color(255, 0, 0);
+	all.sph2 = create_sphere(-100, -80, 5, 90);
+	all.sph2.clr = create_color(0, 0.9, 0.9);
 	all.plan = create_plan(0, -80, 0);
+	all.plan.clr = create_color(125, 125, 125);
 	raytracing(&all);
 	mlx_put_image_to_window(all.env->mlx, all.env->win, all.env->img, 0, 0);
 	mlx_hook(all.env->win, 17, (1L << 17), proper_exit, &all);

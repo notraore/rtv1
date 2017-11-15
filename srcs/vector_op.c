@@ -22,11 +22,14 @@ t_v							vector_sub(t_v *start, t_v *end)
 	return (new);
 }
 
-void		vector_add(t_v *base, t_v *add, t_v *new)
+t_v							vector_add(t_v *base, t_v *add)
 {
-	new->x = base->x + add->x;
-	new->y = base->y + add->y;
-	new->z = base->z + add->z;
+	t_v		new;
+
+	new.x = base->x + add->x;
+	new.y = base->y + add->y;
+	new.z = base->z + add->z;
+	return (new);
 }
 
 double		dot_product(t_v *a, t_v *b)

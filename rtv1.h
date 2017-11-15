@@ -37,14 +37,16 @@ typedef struct s_all		t_all;
 typedef struct s_ray		t_ray;
 typedef struct s_sph		t_sph;
 typedef struct s_cam		t_cam;
+typedef struct s_spot		t_spot;
 typedef struct s_plan		t_plan;
+typedef struct s_color		t_color;
 
 struct						s_mlx
 {
 	int						sl;
 	int						bpp;
 	int						end;
-	int						*data;
+	char					*data;
 	void					*mlx;
 	void					*win;
 	void					*img;
@@ -57,24 +59,43 @@ struct						s_v
 	double 					z;
 };
 
-struct						s_sph
-{
-	t_v						pos;
-	double					r;
-};
-
-struct						s_plan
-{
-	t_v						pos;
-	t_v						normal;
-	t_v						plan_cam;
-};
-
 struct						s_ray
 {
 	t_v						pos;
 	t_v						dir;
 	double					distance;
+};
+
+struct						s_color
+{
+	double					r;
+	double					g;
+	double					b;
+};
+
+struct						s_sph
+{
+	t_v						pos;
+	t_color					clr;
+	double					r;
+};
+
+struct						s_spot
+{
+	t_v						pos;
+	t_ray					ray;
+	t_color					clr;
+	double					intens;
+	int						color;
+
+};
+
+struct						s_plan
+{
+	t_v						pos;
+	t_color					clr;
+	t_v						normal;
+	t_v						plan_cam;
 };
 
 struct						s_cam
@@ -91,6 +112,7 @@ struct 						s_all
 	t_plan					plan;
 	t_sph					sph;
 	t_sph					sph2;
+	t_spot					spot;
 
 	int						x;
 	int						y;
@@ -117,16 +139,16 @@ void						ft_help(void);
 /*
 **vector_op_scal.c
 */
-void						vector_div_scal(t_v *targ, double d, t_v *new);
-void						vector_mult_scal(t_v *targ, double s, t_v *new);
-void						vector_sub_scal(t_v *targ, double s, t_v *new);
-double						vector_normalize(t_v *target);
+t_v							vector_div_scal(t_v *targ, double d);
+t_v							vector_mult_scal(t_v *targ, double s);
+t_v							vector_sub_scal(t_v *targ, double s);
+t_v							vector_normalize(t_v *target);
 double						vector_mult(t_v *base);
 /*
 ** vector_op.c
 */
 t_v							vector_sub(t_v *start, t_v *end);
-void						vector_add(t_v *base, t_v *add, t_v *new);
+t_v							vector_add(t_v *base, t_v *add);
 double						vector_len(t_v *len);
 double						vector_colineaire(double a, double b, double c);
 double						vector_unitaire(double a, double b);
