@@ -73,7 +73,7 @@ bool		cast_sphere(t_all *all)
 	oc.x = all->ray.pos.x - all->sph.pos.x;
 	oc.y = all->ray.pos.y - all->sph.pos.y;
 	oc.z = all->ray.pos.z - all->sph.pos.z;
-	vector_normalize(&all->ray.dir);
+	// vector_normalize(&all->ray.dir);
 
 	a = all->ray.dir.x * all->ray.dir.x + all->ray.dir.y * all->ray.dir.y + all->ray.dir.z * all->ray.dir.z;
 	b = 2 * (all->ray.dir.x * (oc.x) + all->ray.dir.y * (oc.y) + all->ray.dir.z * (oc.z));
@@ -182,28 +182,31 @@ t_color			create_color(double r, double g, double b)
 t_color			cast_light(t_all *all)
 {
 	t_color		clr;
-	double		d;
+	t_v			d;
+	double 		angle;
 
+	all->hit = vector_mult_scal(&all->hit, all->t);
 	all->hit = vector_add(&all->ray.pos, &all->ray.dir);
 	// printf("hit = %f || hit = %f || hit = %f\n", all->hit.x, all->hit.y, all->hit.z);
-	vector_mult_scal(&all->hit, all->t);
 	all->normal = vector_sub(&all->sph.pos, &all->hit);
-	all->normal = vector_normalize(&all->normal);
-	all->spot.ray.dir = vector_sub(&all->hit, &all->spot.pos);
+	all->normal = vector_div_scal(&all->normal, all->sph.r);
+	all->spot.ray.dir = vector_sub(&all->spot.pos, &all->hit);
 	all->spot.ray.dir = vector_normalize(&all->spot.ray.dir);
 	// printf("all->spot.ray.dir.x = %f || all->spot.ray.dir.y = %f || all->spot.ray.dir.z = %f\n", all->spot.ray.dir.x, all->spot.ray.dir.y, all->spot.ray.dir.z);
 
 
-	d = dot_product(&all->normal, &all->spot.ray.dir);
+	// d = vector_mult_scal(&all->ray.dir, -1.0);
+	// angle = dot_product(&d, &all->ray.dir);
+	angle = dot_product(&d, &all->hit);
 
-	if (d < 0)
+	if (angle <= 0)
 	{
-		d = 0;
+		angle = 0;
 		return (create_color(0, 0, 0));
 	}
-	clr.r = all->sph.clr.r * all->spot.clr.r * d;
-	clr.g = all->sph.clr.g * all->spot.clr.g * d;
-	clr.b = all->sph.clr.b * all->spot.clr.b * d;
+	clr.r = all->sph.clr.r * all->spot.clr.r * angle;
+	clr.g = all->sph.clr.g * all->spot.clr.g * angle;
+	clr.b = all->sph.clr.b * all->spot.clr.b * angle;
 	return (clr);
 }
 
@@ -343,10 +346,10 @@ int			main(void)
 	&all.env->sl, &all.env->end);
 
 	all.camera = init_cam(0, 0, -1000);
-	all.spot = create_spot(500, 500, -200, 10);
-	all.spot.clr = create_color(255, 255, 255);
-	all.sph = create_sphere(0, -100, 5, 200);
-	all.sph.clr = create_color(1, 0, 0);
+	all.spot = create_spot(500, 500, 150, 10);
+	all.spot.clr = create_color(1, 1, 1);
+	all.sph = create_sphere(0, -100, 255, 200);
+	all.sph.clr = create_color(0.9, 0, 0);
 	all.sph2 = create_sphere(150, -80, 5, 190);
 	all.sph2.clr = create_color(0, 0, 0.9);
 	// all.plan = create_plan(0, -80, 0);
