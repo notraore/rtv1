@@ -106,6 +106,8 @@ struct						s_cam
 
 struct 						s_all
 {
+	t_v						normal;
+	t_v						hit;
 	t_mlx					*env;
 	t_cam					camera;
 	t_ray					ray;
