@@ -104,6 +104,8 @@ struct						s_cam
 	t_v						vp;
 };
 
+t_
+
 struct 						s_all
 {
 	t_v						normal;

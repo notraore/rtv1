@@ -227,7 +227,6 @@ t_color			cast_light3(t_all *all)
 
 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
 	all->hit = vector_add(&all->ray.pos, &all->hit);
-	// all->normal = vector_sub(&all->plan.pos, &all->hit);
 	all->spot.ray.dir = vector_sub(&all->spot.pos, &all->hit);
 	all->spot.ray.dir = vector_normalize(&all->spot.ray.dir);
 
@@ -244,9 +243,9 @@ t_color			cast_light3(t_all *all)
 
 void		pixel_puts(t_color *clr, t_all *all)
 {
-	all->env->data[(all->x + all->y * WIDTH) * 4] = clr->b * 255;
-	all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = clr->g * 255;
-	all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = clr->r * 255;
+	all->env->data[(all->x + all->y * WIDTH) * 4] = clr->b * 255.0;
+	all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = clr->g * 255.0;
+	all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = clr->r * 255.0;
 }
 
 
@@ -270,15 +269,18 @@ void		raytracing(t_all *all)
 			{
 					all->dist = all->t;
 					clr = cast_light(all);
+					// clr = create_color(1, 1, 1);
 			}
 			if (cast_sphere2(all) == true && all->dist > all->t)
 			{
 					all->dist = all->t;
+					// clr = create_color(1, 1, 0.5);
 					clr = cast_light2(all);
 			}
 			if (cast_plan(all) == true && all->dist > all->t)
 			{
 					all->dist = all->t;
+					// clr = create_color(0.5, 0.5, 0.5);
 					clr = cast_light3(all);
 			}
 			pixel_puts(&clr, all);
@@ -304,14 +306,14 @@ int			main(void)
 	&all.env->sl, &all.env->end);
 
 	all.camera = init_cam(0, 0, -1000);
-	all.spot = create_spot(-385.33, 500, -400, 0.1);
-	all.spot.clr = create_color(0.9, 0.9, 0.9);
-	all.sph = create_sphere(0, 0, -200, 50);
-	all.sph.clr = create_color(1, 0, 0);
-	all.sph2 = create_sphere(80, 80, -205, 100);
+	all.spot = create_spot(93, 450, -800, 0.1);
+	all.spot.clr = create_color(1, 1, 1);
+	all.sph = create_sphere(85, -33, -205, 145);
+	all.sph.clr = create_color(0.541176, 0.168627, 0.886275);
+	all.sph2 = create_sphere(-50, 80, -280, 100);
 	all.sph2.clr = create_color(0, 0, 0.9);
 	all.plan = create_plan(0, -80, 0);
-	all.plan.clr = create_color(0.5, 0.5, 0.5);
+	all.plan.clr = create_color(1, 0.2, 0.1);
 	raytracing(&all);
 	mlx_put_image_to_window(all.env->mlx, all.env->win, all.env->img, 0, 0);
 	mlx_hook(all.env->win, 17, (1L << 17), proper_exit, &all);
