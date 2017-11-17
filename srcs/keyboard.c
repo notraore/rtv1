@@ -15,7 +15,6 @@
 int			proper_exit(t_all *all)
 {
 	mlx_destroy_image(all->env->mlx, all->env->img);
-	system("killall afplay 2&>/dev/null >/dev/null");
 	exit(EXIT_SUCCESS);
 	return (0);
 }
