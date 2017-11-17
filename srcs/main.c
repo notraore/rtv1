@@ -195,7 +195,7 @@ t_color			cast_light(t_all *all)
 	// printf("all->spot.ray.dir.x = %f || all->spot.ray.dir.y = %f || all->spot.ray.dir.z = %f\n", all->spot.ray.dir.x, all->spot.ray.dir.y, all->spot.ray.dir.z);
 
 
-	// d = vector_mult_scal(&all->ray.dir, -1.0);
+	d = vector_mult_scal(&all->ray.dir, -1.0);
 	// angle = dot_product(&d, &all->ray.dir);
 	angle = dot_product(&d, &all->hit);
 
