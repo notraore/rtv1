@@ -114,12 +114,13 @@ struct						s_all
 	t_ray					ray;
 	t_ray					shadow;
 	t_plan					plan;
-	t_sph					sph;
-	t_sph					sph2;
+	t_sph					sph[20];
 	t_spot					spot;
 
 	int						x;
 	int						y;
+	size_t					sphnbr;
+	size_t					nbr;
 	double					t;
 	double					t1;
 	double					dist;

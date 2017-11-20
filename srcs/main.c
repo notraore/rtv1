@@ -56,19 +56,19 @@ t_sph		create_sphere(double x, double y, double z, double radius)
 	return (sph);
 }
 
-bool		cast_sphere(t_all *all, t_ray *t)
+bool		cast_sphere(t_all *all, t_ray *t, t_sph *sph)
 {
 	double		a;
 	double		b;
 	double		c;
 	t_v			o;
 
-	o.x = t->pos.x - all->sph.pos.x;
-	o.y = t->pos.y - all->sph.pos.y;
-	o.z = t->pos.z - all->sph.pos.z;
+	o.x = t->pos.x - sph[all->nbr].pos.x;
+	o.y = t->pos.y - sph[all->nbr].pos.y;
+	o.z = t->pos.z - sph[all->nbr].pos.z;
 	a = t->dir.x * t->dir.x + t->dir.y * t->dir.y + t->dir.z * t->dir.z;
 	b = 2 * (t->dir.x * (o.x) + t->dir.y * (o.y) + t->dir.z * (o.z));
-	c = ((o.x * o.x) + (o.y * o.y) + (o.z * o.z)) - all->sph.r * all->sph.r;
+	c = ((o.x * o.x) + (o.y * o.y) + (o.z * o.z)) - sph[all->nbr].r * sph[all->nbr].r;
 	all->delta = b * b - 4 * a * c;
 	if (all->delta < 0)
 		return (false);
@@ -79,35 +79,6 @@ bool		cast_sphere(t_all *all, t_ray *t)
 		all->t1 = (-b + sqrt(all->delta)) / (2 * a);
 		all->t2 = (-b - sqrt(all->delta)) / (2 * a);
 		all->t = all->t1 >= all->t2 ? all->t2 : all->t1;
-		return (true);
-	}
-	return (false);
-}
-
-bool		cast_sphere2(t_all *all, t_ray *t)
-{
-	double		a;
-	double		b;
-	double		c;
-	t_v			o;
-
-	o.x = t->pos.x - all->sph2.pos.x;
-	o.y = t->pos.y - all->sph2.pos.y;
-	o.z = t->pos.z - all->sph2.pos.z;
-	vector_normalize(&t->dir);
-	a = t->dir.x * t->dir.x + t->dir.y * t->dir.y + t->dir.z * t->dir.z;
-	b = 2 * (t->dir.x * (o.x) + t->dir.y * (o.y) + t->dir.z * (o.z));
-	c = ((o.x * o.x) + (o.y * o.y) + (o.z * o.z)) - all->sph2.r * all->sph2.r;
-	all->delta = b * b - 4 * a * c;
-	if (all->delta < 0)
-		return (false);
-	if (all->delta == 0)
-		all->delta = -b;
-	if (all->delta > 0)
-	{
-		all->t1 = (-b + sqrt(all->delta)) / (2 * a);
-		all->t2 = (-b - sqrt(all->delta)) / (2 * a);
-		all->t = all->t1 > all->t2 ? all->t2 : all->t1;
 		return (true);
 	}
 	return (false);
@@ -168,43 +139,17 @@ t_color		cast_light(t_all *all)
 
 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
 	all->hit = vector_add(&all->ray.pos, &all->hit);
-	all->normal = vector_sub(&all->sph.pos, &all->hit);
-	all->normal = vector_div_scal(&all->normal, all->sph.r);
+	all->normal = vector_sub(&all->sph[all->nbr].pos, &all->hit);
+	all->normal = vector_div_scal(&all->normal, all->sph[all->nbr].r);
 	all->spot.ray.dir = vector_sub(&all->spot.pos, &all->hit);
 	all->spot.ray.dir = vector_normalize(&all->spot.ray.dir);
 	d = vector_mult_scal(&all->spot.ray.dir, (-1.0));
 	angle = dot_product(&d, &all->normal);
 	if (angle <= 0)
 		return (create_color(0, 0, 0, 0));
-	all->shadow.dir = vector_sub(&all->hit, &all->spot.pos);
-	all->shadow.pos = all->hit;
-	if (cast_sphere2(all, &all->shadow) == true)
-		return (create_color(0, 0, 0, 0));
-	clr.r = all->sph.clr.r * all->spot.clr.r * angle;
-	clr.g = all->sph.clr.g * all->spot.clr.g * angle;
-	clr.b = all->sph.clr.b * all->spot.clr.b * angle;
-	return (clr);
-}
-
-t_color		cast_light2(t_all *all)
-{
-	t_color		clr;
-	t_v			d;
-	double		angle;
-
-	all->hit = vector_mult_scal(&all->ray.dir, all->t);
-	all->hit = vector_add(&all->ray.pos, &all->hit);
-	all->normal = vector_sub(&all->sph2.pos, &all->hit);
-	all->normal = vector_div_scal(&all->normal, all->sph2.r);
-	all->spot.ray.dir = vector_sub(&all->spot.pos, &all->hit);
-	all->spot.ray.dir = vector_normalize(&all->spot.ray.dir);
-	d = vector_mult_scal(&all->spot.ray.dir, (-1.0));
-	angle = dot_product(&d, &all->normal);
-	if (angle <= 0)
-		return (create_color(0, 0, 0, 0));
-	clr.r = all->sph2.clr.r * all->spot.clr.r * angle;
-	clr.g = all->sph2.clr.g * all->spot.clr.g * angle;
-	clr.b = all->sph2.clr.b * all->spot.clr.b * angle;
+	clr.r = all->sph[all->nbr].clr.r * all->spot.clr.r * angle;
+	clr.g = all->sph[all->nbr].clr.g * all->spot.clr.g * angle;
+	clr.b = all->sph[all->nbr].clr.b * all->spot.clr.b * angle;
 	return (clr);
 }
 
@@ -224,8 +169,7 @@ t_color		cast_light3(t_all *all)
 		return (create_color(0, 0, 0, 0));
 	all->shadow.dir = vector_sub(&all->hit, &all->spot.pos);
 	all->shadow.pos = all->hit;
-	if (cast_sphere(all, &all->shadow) == true ||
-	cast_sphere2(all, &all->shadow) == true)
+	if (cast_sphere(all, &all->shadow, &all->sph[all->nbr]) == true)
 		return (create_color(0, 0, 0, 0));
 	clr.r = all->plan.clr.r * all->spot.clr.r * angle;
 	clr.g = all->plan.clr.g * all->spot.clr.g * angle;
@@ -249,6 +193,7 @@ void		raytracing(t_all *all)
 
 	all->y = 0;
 	y1 = (HEIGHT / 2);
+	all->nbr = 1;
 	while (all->y < HEIGHT)
 	{
 		all->x = 0;
@@ -257,16 +202,17 @@ void		raytracing(t_all *all)
 		{
 			all->dist = 20000;
 			all->ray = init_ray(all, x1, y1);
-			if (cast_sphere(all, &all->ray) == true && all->dist > all->t)
+			while (all->nbr < all->sphnbr)
 			{
-				all->dist = all->t;
-				clr = cast_light(all);
+				if (cast_sphere(all, &all->ray, &all->sph[all->nbr]) == true && all->dist > all->t)
+				{
+					printf("all->nbr = %zu\n", all->nbr);
+					all->dist = all->t;
+					clr = cast_light(all);
+				}
+				all->nbr++;
 			}
-			if (cast_sphere2(all, &all->ray) == true && all->dist > all->t)
-			{
-				all->dist = all->t;
-				clr = cast_light2(all);
-			}
+			all->nbr = 0;
 			if (cast_plan(all) == true && all->dist > all->t)
 			{
 				all->dist = all->t;
@@ -287,6 +233,7 @@ int			main(void)
 	t_mlx		mlx;
 	t_all		all;
 
+	all.sphnbr = 2;
 	all.env = &mlx;
 	all.env->mlx = mlx_init();
 	all.env->win = mlx_new_window(all.env->mlx, WIDTH, HEIGHT, "RTv1");
@@ -296,10 +243,10 @@ int			main(void)
 	all.camera = init_cam(0, 0, -(double)WIDTH);
 	all.spot = create_spot(-85, 200, -800, 0.1);
 	all.spot.clr = create_color(1, 1, 1, 0);
-	all.sph = create_sphere(20, 0, -405, 44);
-	all.sph.clr = create_color(1, 1, 0, 0);
-	all.sph2 = create_sphere(-75, 35, -555, 50);
-	all.sph2.clr = create_color(1, 0.1, 0.0, 0);
+	all.sph[0] = create_sphere(20, -20, -405, 84);
+	all.sph[0].clr = create_color(0.196078, 0.803922, 0.196078, 0);
+	all.sph[1] = create_sphere(-75, 35, -555, 50);
+	all.sph[1].clr = create_color(1, 0.1, 0.0, 0);
 	all.plan = create_plan(0, -80, 0);
 	all.plan.clr = create_color(0.5, 0.5, 0.5, 1);
 	raytracing(&all);
