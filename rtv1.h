@@ -36,6 +36,7 @@ typedef struct s_mlx		t_mlx;
 typedef struct s_all		t_all;
 typedef struct s_ray		t_ray;
 typedef struct s_sph		t_sph;
+typedef struct s_cyl		t_cyl;
 typedef struct s_cam		t_cam;
 typedef struct s_spot		t_spot;
 typedef struct s_plan		t_plan;
@@ -81,6 +82,13 @@ struct						s_sph
 	double					r;
 };
 
+struct						s_cyl
+{
+	t_v						pos;
+	t_color					clr;
+	t_v						normal;
+};
+
 struct						s_spot
 {
 	t_v						pos;
@@ -114,13 +122,15 @@ struct						s_all
 	t_ray					ray;
 	t_ray					shadow;
 	t_plan					plan;
-	t_sph					sph[20];
+	t_sph					sph;
+	t_cyl					cyl;
 	t_spot					spot;
+	t_v						vecdirx;
+	t_v						vecdiry;
+	t_v						vecdirz;
 
 	int						x;
 	int						y;
-	size_t					sphnbr;
-	size_t					nbr;
 	double					t;
 	double					t1;
 	double					dist;

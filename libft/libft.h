@@ -19,6 +19,7 @@
 # include <unistd.h>
 # include <fcntl.h>
 # include <stdio.h>
+# include <stdbool.h>
 # include <math.h>
 # include "get_next_line.h"
 
@@ -87,6 +88,7 @@ int					ft_isdigit(int c);
 int					ft_isalpha(int c);
 int					ft_toupper(int c);
 int					ft_tolower(int c);
+double				ft_atof(char *str);
 char				*ft_strlowcase(char *str);
 char				*ft_strstr(const char *big, const char *little);
 int					ft_isspace(int c);
