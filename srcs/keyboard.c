@@ -14,7 +14,8 @@
 
 int			proper_exit(t_all *all)
 {
-	mlx_destroy_image(all->env->mlx, all->env->img);
+	(void)all;
+	// mlx_destroy_image(all->env->mlx, all->env->img);
 	exit(EXIT_SUCCESS);
 	return (0);
 }

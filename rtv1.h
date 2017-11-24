@@ -31,16 +31,21 @@
 # include <stdbool.h>
 # include <time.h>
 
+
+#define malloc(x) malloc_wrapper(x)
+void* malloc_wrapper(size_t size);
+
 typedef struct s_v			t_v;
 typedef struct s_mlx		t_mlx;
 typedef struct s_all		t_all;
 typedef struct s_ray		t_ray;
-typedef struct s_sph		t_sph;
-typedef struct s_cyl		t_cyl;
+typedef struct s_obj		t_obj;
+typedef struct s_first		t_first;
 typedef struct s_cam		t_cam;
 typedef struct s_spot		t_spot;
 typedef struct s_plan		t_plan;
 typedef struct s_color		t_color;
+typedef struct s_list		t_list;
 
 struct						s_mlx
 {
@@ -75,18 +80,20 @@ struct						s_color
 	double					a;
 };
 
-struct						s_sph
+struct						s_obj
 {
 	t_v						pos;
-	t_color					clr;
+	int						id;
+	char					type;
 	double					r;
+	t_color					clr;
+	struct		s_obj		*next;
 };
 
-struct						s_cyl
+struct						s_list
 {
-	t_v						pos;
-	t_color					clr;
-	t_v						normal;
+	void					*content;
+	struct s_list			*next;
 };
 
 struct						s_spot
@@ -96,7 +103,6 @@ struct						s_spot
 	t_color					clr;
 	double					intens;
 	int						color;
-
 };
 
 struct						s_plan
@@ -121,16 +127,23 @@ struct						s_all
 	t_cam					camera;
 	t_ray					ray;
 	t_ray					shadow;
-	t_plan					plan;
-	t_sph					sph;
-	t_cyl					cyl;
+	t_obj					*obj;
 	t_spot					spot;
 	t_v						vecdirx;
 	t_v						vecdiry;
 	t_v						vecdirz;
+	t_obj					*first;
+/*
+**parsing
+*/
+	int						fd;
+	int						value;
+	char					*line;
+	char					**tmp;
 
 	int						x;
 	int						y;
+	int						ind;
 	double					t;
 	double					t1;
 	double					dist;
