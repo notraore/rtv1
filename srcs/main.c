@@ -109,7 +109,6 @@ t_obj		*create_sphere(char **tmp, int id)
 		ft_atof(tmp[6]), ft_atof(tmp[7]));
 		obj->id = id;
 		obj->type = 'S';
-		obj->next = NULL;
 	}
 	return (obj);
 }
@@ -330,18 +329,22 @@ void		raytracing(t_all *all)
 	}
 }
 
+
+
 void		get_scene(int fd, t_all *all)
 {
 	int		val;
-
+	t_obj	obj;
+	t_sll	**all_obj;
 
 	while ((val = get_next_line(fd, &all->line)) == 1)
 	{
 		all->tmp = ft_strsplit(all->line, '\t');
-		if (all->tmp[0][0] == 'S' || all->tmp[0][0] == 'C' || all->tmp[0][0] == 'P')
-			all->obj = create_object(all->tmp, all->ind);
-		// if (all->tmp[0][0] == 'P')
-		// 	all->obj = create_plan(all->tmp, all->ind);
+		if (all->tmp[0][0] == 'S')
+		{
+			obj = create_object(all->tmp, all->ind);
+			create_sll(all_obj, &obj);
+		}
 		all->ind++;
 		free_tab(all->tmp);
 	}

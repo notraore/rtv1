@@ -14,11 +14,8 @@ NAME=rtv1
 CC=gcc
 SRC=srcs/main.c srcs/error.c srcs/keyboard.c srcs/init.c srcs/vector_op.c \
 srcs/vector_op_scal.c
-SRC+=srcs/malloc_wrapper.c
 OBJ=main.o error.o keyboard.o init.o vector_op.o vector_op_scal.o
-OBJ+=malloc_wrapper.o
-FLAGS=-Wall -Wextra -Werror -g3 -fsanitize=address
-# FLAGS=-Wall -Wextra -Werror
+FLAGS=-Wall -Wextra -Werror
 LIB=-L ./libft -lft
 MLX=-L ./miniLibx_macos -lmlx -framework OpenGL -framework AppKit
 

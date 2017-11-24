@@ -40,7 +40,7 @@ typedef struct s_mlx		t_mlx;
 typedef struct s_all		t_all;
 typedef struct s_ray		t_ray;
 typedef struct s_obj		t_obj;
-typedef struct s_first		t_first;
+typedef struct s_sll		t_sll;
 typedef struct s_cam		t_cam;
 typedef struct s_spot		t_spot;
 typedef struct s_plan		t_plan;
@@ -87,13 +87,12 @@ struct						s_obj
 	char					type;
 	double					r;
 	t_color					clr;
-	struct		s_obj		*next;
 };
 
-struct						s_list
+struct						s_sll
 {
 	void					*content;
-	struct s_list			*next;
+	struct s_sll			*next;
 };
 
 struct						s_spot
@@ -132,7 +131,6 @@ struct						s_all
 	t_v						vecdirx;
 	t_v						vecdiry;
 	t_v						vecdirz;
-	t_obj					*first;
 /*
 **parsing
 */
