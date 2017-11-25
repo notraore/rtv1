@@ -6,7 +6,7 @@
 /*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:07:14 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/12 19:37:04 by nobila           ###   ########.fr       */
+/*   Updated: 2017/11/25 23:49:17 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,23 +95,6 @@ t_color		create_color(double r, double g, double b, double a)
 	return (clr);
 }
 
-t_obj		*create_sphere(char **tmp, int id)
-{
-	t_obj		*obj;
-
-	if (!(obj = (t_obj *)malloc(sizeof(t_obj))))
-		return (NULL);
-	if (obj)
-	{
-		obj->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-		obj->r = ft_atof(tmp[4]);
-		obj->clr = create_color(ft_atof(tmp[5]), ft_atof(tmp[6]),
-		ft_atof(tmp[6]), ft_atof(tmp[7]));
-		obj->id = id;
-		obj->type = 'S';
-	}
-	return (obj);
-}
 
 bool		cast_sphere(t_all *all, t_ray *ray, t_obj *obj)
 {
@@ -283,20 +266,6 @@ void		pixel_puts(t_color *clr, t_all *all)
 	all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = clr->a * 255.0;
 }
 
-// static void			ft_last_fd(t_stock **file, int fd)
-// {
-// 	t_stock *tmp;
-
-// 	tmp = *file;
-// 	if (!tmp)
-// 		*file = ft_create_fd(fd);
-// 	else
-// 	{
-// 		while (tmp->next)
-// 			tmp = tmp->next;
-// 		tmp->next = ft_create_fd(fd);
-// 	}
-// }
 
 void		raytracing(t_all *all)
 {
@@ -329,24 +298,101 @@ void		raytracing(t_all *all)
 	}
 }
 
+// static void			ft_last_fd(t_stock **file, int fd)
+// {
+// 	t_stock *tmp;
 
+// 	tmp = *file;
+// 	if (!tmp)
+// 		*file = ft_create_fd(fd);
+// 	else
+// 	{
+// 		while (tmp->next)
+// 			tmp = tmp->next;
+// 		tmp->next = ft_create_fd(fd);
+// 	}
+// }
+void		create_sphere(char **tmp, t_obj *ref)
+{
+	ref->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+	ref->r = ft_atof(tmp[4]);
+	ref->clr = create_color(ft_atof(tmp[5]), ft_atof(tmp[6]),
+	ft_atof(tmp[6]), ft_atof(tmp[7]));
+	ref->id = ft_atoi(tmp[8]);
+	ref->type = 'S';
+}
+
+t_sll		*create_sll(t_obj *content)
+{
+	t_sll	*sll;
+
+	if (!(sll = malloc(sizeof(t_sll))))
+		return (NULL);
+	sll->obj_lst = content;
+	sll->next = NULL;
+	return (sll);
+}
+
+void		add_to_list(t_sll **all_obj, t_sll *new_sll)
+{
+	t_sll		*tmp;
+//*****************************************Segfault ici**********************************************//
+	if (!(tmp = *all_obj))
+		ft_kill("error assigation");
+	if (!(*all_obj))
+		*all_obj = new_sll;
+	else
+	{
+		while (tmp->next)
+			tmp = tmp->next;
+		new_sll->next = NULL;
+		tmp->next = new_sll;
+	}
+}
+
+t_obj		*create_obj(t_obj *ref)
+{
+	t_obj	*obj;
+
+	if (!(obj = (t_obj *)malloc(sizeof(t_obj))))
+		return (NULL);
+	obj->type = ref->type;
+	obj->pos = ref->pos;
+	obj->clr = ref->clr;
+	obj->id = ref->id;
+	obj->r = ref->r;
+	return (obj);
+}
+
+void		get_info(char **tmp, t_obj *ref)
+{
+	bzero(ref, sizeof(t_obj));
+	//fonction() de check des veleurs selon l'objet;
+	if (tmp[0][0] == 'S')
+		create_sphere(tmp, ref);
+}
 
 void		get_scene(int fd, t_all *all)
 {
 	int		val;
-	t_obj	obj;
+	t_obj	ref;
+	t_obj	*new_obj;
 	t_sll	**all_obj;
+	t_sll	*new_sll;
 
+	all_obj = NULL;
 	while ((val = get_next_line(fd, &all->line)) == 1)
 	{
 		all->tmp = ft_strsplit(all->line, '\t');
+		get_info(all->tmp, &ref);
 		if (all->tmp[0][0] == 'S')
 		{
-			obj = create_object(all->tmp, all->ind);
-			create_sll(all_obj, &obj);
+			new_obj = create_obj(&ref);
+			new_sll = create_sll(new_obj);
+			printf("%f\n", new_obj->r);
+			add_to_list(all_obj, new_sll);
 		}
-		all->ind++;
-		free_tab(all->tmp);
+		// free_tab(all->tmp);
 	}
 }
 
@@ -354,6 +400,7 @@ int			main(int argc, char **argv)
 {
 	t_mlx		mlx;
 	t_all		*all;
+
 	if (argc < 2)
 		ft_kill("no arguments");
 	all = (t_all *)malloc(sizeof(t_all));
@@ -363,7 +410,6 @@ int			main(int argc, char **argv)
 	all->env->img = mlx_new_image(all->env->mlx, WIDTH, HEIGHT);
 	all->env->data = mlx_get_data_addr(all->env->img, &all->env->bpp,
 	&all->env->sl, &all->env->end);
-printf("TOTO\n");
 	if (!(all->fd = open(argv[1], O_RDONLY)))
 		ft_kill("fd error");
 	all->camera = init_cam(0, 0, -(double)WIDTH);

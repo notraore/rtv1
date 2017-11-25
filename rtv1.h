@@ -6,7 +6,7 @@
 /*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:06:37 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/12 19:10:28 by nobila           ###   ########.fr       */
+/*   Updated: 2017/11/25 23:25:18 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,8 +31,6 @@
 # include <stdbool.h>
 # include <time.h>
 
-
-#define malloc(x) malloc_wrapper(x)
 void* malloc_wrapper(size_t size);
 
 typedef struct s_v			t_v;
@@ -91,7 +89,7 @@ struct						s_obj
 
 struct						s_sll
 {
-	void					*content;
+	t_obj					*obj_lst;
 	struct s_sll			*next;
 };
 
