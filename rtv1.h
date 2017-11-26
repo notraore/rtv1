@@ -85,12 +85,8 @@ struct						s_obj
 	char					type;
 	double					r;
 	t_color					clr;
-};
-
-struct						s_sll
-{
-	t_obj					*obj_lst;
-	struct s_sll			*next;
+	t_ray					ray;
+	struct s_obj			*next;
 };
 
 struct						s_spot
@@ -118,6 +114,7 @@ struct						s_cam
 
 struct						s_all
 {
+	t_obj					*head;
 	t_v						normal;
 	t_v						hit;
 	t_mlx					*env;
@@ -136,6 +133,7 @@ struct						s_all
 	int						value;
 	char					*line;
 	char					**tmp;
+	t_obj					*o_tmp;
 
 	int						x;
 	int						y;

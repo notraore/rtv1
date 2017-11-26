@@ -15,7 +15,12 @@ CC=gcc
 SRC=srcs/main.c srcs/error.c srcs/keyboard.c srcs/init.c srcs/vector_op.c \
 srcs/vector_op_scal.c
 OBJ=main.o error.o keyboard.o init.o vector_op.o vector_op_scal.o
+
+ifeq ($(DEBUG), yes)
+FLAGS=-g3 -fsanitize=address
+else
 FLAGS=-Wall -Wextra -Werror
+endif
 LIB=-L ./libft -lft
 MLX=-L ./miniLibx_macos -lmlx -framework OpenGL -framework AppKit
 

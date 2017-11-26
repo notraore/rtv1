@@ -96,31 +96,6 @@ t_color		create_color(double r, double g, double b, double a)
 }
 
 
-bool		cast_sphere(t_all *all, t_ray *ray, t_obj *obj)
-{
-	double		a;
-	double		b;
-	double		c;
-	t_v			o;
-
-	o = vector_sub(&obj->pos, &ray->pos);
-	a = dot_product(&ray->dir, &ray->dir);
-	b = 2 * dot_product(&ray->dir, &o);
-	c = dot_product(&o, &o) - obj->r * obj->r;
-	all->delta = b * b - 4 * a * c;
-	if (all->delta < 0)
-		return (false);
-	if (all->delta == 0)
-		all->delta = -b;
-	if (all->delta > 0)
-	{
-		all->t1 = (-b + sqrt(all->delta)) / (2 * a);
-		all->t2 = (-b - sqrt(all->delta)) / (2 * a);
-		all->t = all->t1 >= all->t2 ? all->t2 : all->t1;
-		return (true);
-	}
-	return (false);
-}
 
 // bool		cast_cyl(t_all *all, t_ray *ray, t_cyl *cyl)
 // {
@@ -153,44 +128,50 @@ bool		cast_sphere(t_all *all, t_ray *ray, t_obj *obj)
 // 	return (false);
 // }
 
-// t_plan		create_plan(char **tmp)
-// {
-// 	t_plan		plan;
+bool		cast_plan(t_all *all, t_ray *ray, t_obj *plan)
+{
+	t_v			o;
+	double		a;
+	double		b;
+	double		s;
 
-// 	plan.normal = create_vector(0, 1, 0);
-// 	plan.pos = create_vector(x, y, z);
-// 	return (plan);
-// }
+	o = vector_sub(&plan->pos, &all->camera.cam_pos);
+	a = dot_product(&all->vecdiry, &o);
+	b = dot_product(&all->vecdiry, &ray->dir);
+	s = -(a / b);
+	if (a == 0 || s < 0)
+		return (false);
+	all->t = s;
+	return (true);
+}
 
-// bool		cast_plan(t_all *all)
-// {
-// 	t_v			o;
-// 	double		a;
-// 	double		b;
-// 	double		s;
+bool		cast_sphere(t_all *all, t_ray *ray, t_obj *obj)
+{
+	double		a;
+	double		b;
+	double		c;
+	t_v			o;
 
-// 	o = vector_sub(&all->plan.pos, &all->camera.cam_pos);
-// 	a = dot_product(&all->plan.normal, &o);
-// 	b = dot_product(&all->plan.normal, &all->ray.dir);
-// 	s = -(a / b);
-// 	if (a == 0 || s < 0)
-// 		return (false);
-// 	all->t = s;
-// 	return (true);
-// }
+	o = vector_sub(&obj->pos, &ray->pos);
+	a = dot_product(&ray->dir, &ray->dir);
+	b = 2 * dot_product(&ray->dir, &o);
+	c = dot_product(&o, &o) - obj->r * obj->r;
+	all->delta = b * b - 4 * a * c;
+	if (all->delta < 0)
+		return (false);
+	if (all->delta == 0)
+		all->delta = -b;
+	if (all->delta > 0)
+	{
+		all->t1 = (-b + sqrt(all->delta)) / (2 * a);
+		all->t2 = (-b - sqrt(all->delta)) / (2 * a);
+		all->t = all->t1 >= all->t2 ? all->t2 : all->t1;
+		return (true);
+	}
+	return (false);
+}
 
-// t_spot		create_spot(double x, double y, double z, double intens)
-// {
-// 	t_spot	spot;
-
-// 	spot.pos = create_vector(x, y, z);
-// 	spot.ray.pos = create_vector(x, y, z);
-// 	spot.intens = intens;
-// 	return (spot);
-// }
-
-
-t_color		cast_light(t_all *all)
+t_color		cast_light_plan(t_all *all, t_obj *plan, t_obj *light)
 {
 	t_color		clr;
 	t_v			d;
@@ -198,65 +179,21 @@ t_color		cast_light(t_all *all)
 
 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
 	all->hit = vector_add(&all->ray.pos, &all->hit);
-	all->normal = vector_sub(&all->obj->pos, &all->hit);
-	all->normal = vector_div_scal(&all->normal, all->obj->r);
-	all->spot.ray.dir = vector_sub(&all->spot.pos, &all->hit);
-	all->spot.ray.dir = vector_normalize(&all->spot.ray.dir);
-	d = vector_mult_scal(&all->spot.ray.dir, (-1.0));
-	angle = dot_product(&d, &all->normal);
+	light->ray.dir = vector_sub(&light->pos, &all->hit);
+	light->ray.dir = vector_normalize(&light->ray.dir);
+	d = vector_mult_scal(&light->ray.dir, (-1.0));
+	angle = dot_product(&d, &all->vecdiry);
 	if (angle <= 0)
 		return (create_color(0, 0, 0, 0));
-	clr.r = all->obj->clr.r * all->spot.clr.r * angle;
-	clr.g = all->obj->clr.g * all->spot.clr.g * angle;
-	clr.b = all->obj->clr.b * all->spot.clr.b * angle;
+	// all->shadow.dir = vector_sub(&all->hit, &light->pos);
+	// all->shadow.pos = all->hit;
+	// if (cast_sphere(all, &all->shadow, all->o_tmp) == true)
+	// 	return (create_color(0, 0, 0, 0));
+	clr.r = plan->clr.r * light->clr.r * angle;
+	clr.g = plan->clr.g * light->clr.g * angle;
+	clr.b = plan->clr.b * light->clr.b * angle;
 	return (clr);
 }
-
-// t_color		cast_light2(t_all *all)
-// {
-// 	t_color		clr;
-// 	t_v			d;
-// 	double		angle;
-
-// 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
-// 	all->hit = vector_add(&all->ray.pos, &all->hit);
-// 	all->normal = vector_sub(&all->cyl.pos, &all->hit);
-// 	all->normal = vector_div_scal(&all->normal, -1);
-// 	all->spot.ray.dir = vector_sub(&all->spot.pos, &all->hit);
-// 	all->spot.ray.dir = vector_normalize(&all->spot.ray.dir);
-// 	d = vector_mult_scal(&all->spot.ray.dir, (-1.0));
-// 	angle = dot_product(&d, &all->normal);
-// 	if (angle <= 0)
-// 		return (create_color(0, 0, 0, 0));
-// 	clr.r = all->cyl.clr.r * all->spot.clr.r * angle;
-// 	clr.g = all->cyl.clr.g * all->spot.clr.g * angle;
-// 	clr.b = all->cyl.clr.b * all->spot.clr.b * angle;
-// 	return (clr);
-// }
-
-// t_color		cast_light3(t_all *all)
-// {
-// 	t_color		clr;
-// 	t_v			d;
-// 	double		angle;
-
-// 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
-// 	all->hit = vector_add(&all->ray.pos, &all->hit);
-// 	all->spot.ray.dir = vector_sub(&all->spot.pos, &all->hit);
-// 	all->spot.ray.dir = vector_normalize(&all->spot.ray.dir);
-// 	d = vector_mult_scal(&all->spot.ray.dir, (-1.0));
-// 	angle = dot_product(&d, &all->plan.normal);
-// 	if (angle <= 0)
-// 		return (create_color(0, 0, 0, 0));
-// 	all->shadow.dir = vector_sub(&all->hit, &all->spot.pos);
-// 	all->shadow.pos = all->hit;
-// 	if (cast_sphere(all, &all->shadow, &all->sph) == true)
-// 		return (create_color(0, 0, 0, 0));
-// 	clr.r = all->plan.clr.r * all->spot.clr.r * angle;
-// 	clr.g = all->plan.clr.g * all->spot.clr.g * angle;
-// 	clr.b = all->plan.clr.b * all->spot.clr.b * angle;
-// 	return (clr);
-// }
 
 void		pixel_puts(t_color *clr, t_all *all)
 {
@@ -266,14 +203,66 @@ void		pixel_puts(t_color *clr, t_all *all)
 	all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = clr->a * 255.0;
 }
 
+t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
+{
+	t_color		clr;
+	t_v			d;
+	double		angle;
+
+	all->hit = vector_mult_scal(&all->ray.dir, all->t);
+	all->hit = vector_add(&all->ray.pos, &all->hit);
+	all->normal = vector_sub(&tmp->pos, &all->hit);
+	all->normal = vector_div_scal(&all->normal, tmp->r);
+	light->ray.dir = vector_sub(&light->pos, &all->hit);
+	light->ray.dir = vector_normalize(&light->ray.dir);
+	d = vector_mult_scal(&light->ray.dir, (-1.0));
+	angle = dot_product(&d, &all->normal);
+	if (angle <= 0)
+		return (create_color(0, 0, 0, 0));
+	// all->shadow.dir = vector_sub(&all->hit, &light->pos);
+	// all->shadow.pos = all->hit;
+	// if (cast_sphere(all, &all->shadow, all->o_tmp) == true)
+	// 	return (create_color(0, 0, 0, 0));
+	clr.r = tmp->clr.r * light->clr.r * angle;
+	clr.g = tmp->clr.g * light->clr.g * angle;
+	clr.b = tmp->clr.b * light->clr.b * angle;
+	return (clr);
+}
+
+void	print_tab(t_obj *some)
+{
+	t_obj	*tmp;
+
+	tmp = some;
+	if (tmp)
+		while (tmp)
+		{
+			printf("tmp->type = %c | ", tmp->type);
+			printf("tmp->pos.x = %f | ", tmp->pos.x);
+			printf("tmp->pos.y = %f | ", tmp->pos.y);
+			printf("tmp->pos.z = %f | ", tmp->pos.z);
+			printf("tmp->r = %f | ", tmp->r);
+			printf("tmp->id = %d\n", tmp->id);
+			tmp = tmp->next;
+		}
+}
 
 void		raytracing(t_all *all)
 {
 	int			x1;
 	int			y1;
+	t_obj		*lght;
+	t_obj		*plan;
 	t_color		clr;
 
 	all->y = 0;
+	all->o_tmp = all->head;
+	lght = all->head;
+	plan = all->head;
+	while (lght->type != 'L')
+		lght = lght->next;
+	while (plan->type != 'P')
+		plan = plan->next;
 	y1 = (HEIGHT / 2);
 	while (all->y < HEIGHT)
 	{
@@ -283,117 +272,110 @@ void		raytracing(t_all *all)
 		{
 			all->dist = 20000;
 			all->ray = init_ray(all, x1, y1);
-			if (cast_sphere(all, &all->ray, all->obj) == true && all->dist > all->t)
-			{	
-				all->dist = all->t;
-				clr = cast_light(all);
+			while (all->o_tmp)
+			{
+				if (cast_sphere(all, &all->ray, all->o_tmp) == true && all->dist > all->t)
+				{
+					all->dist = all->t;
+					clr = cast_light(all, all->o_tmp, lght);
+				}
+				if (cast_plan(all, &all->ray, plan) == true && all->dist > all->t)
+				{
+					all->dist = all->t;
+					clr = cast_light_plan(all, plan, lght);
+				}
+				all->o_tmp = all->o_tmp->next;
 			}
 			pixel_puts(&clr, all);
-			clr = create_color(0.09, 0.09, 0.09, 0);
+			clr = create_color(0.04, 0.04, 0.04, 0);
 			all->x++;
 			x1++;
+			all->o_tmp = all->head;
 		}
 		all->y++;
 		y1--;
 	}
 }
 
-// static void			ft_last_fd(t_stock **file, int fd)
-// {
-// 	t_stock *tmp;
-
-// 	tmp = *file;
-// 	if (!tmp)
-// 		*file = ft_create_fd(fd);
-// 	else
-// 	{
-// 		while (tmp->next)
-// 			tmp = tmp->next;
-// 		tmp->next = ft_create_fd(fd);
-// 	}
-// }
-void		create_sphere(char **tmp, t_obj *ref)
+t_obj		*create_plan(char **tmp)
 {
-	ref->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	ref->r = ft_atof(tmp[4]);
-	ref->clr = create_color(ft_atof(tmp[5]), ft_atof(tmp[6]),
-	ft_atof(tmp[6]), ft_atof(tmp[7]));
-	ref->id = ft_atoi(tmp[8]);
-	ref->type = 'S';
-}
+	t_obj		*new;
 
-t_sll		*create_sll(t_obj *content)
-{
-	t_sll	*sll;
-
-	if (!(sll = malloc(sizeof(t_sll))))
+	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
 		return (NULL);
-	sll->obj_lst = content;
-	sll->next = NULL;
-	return (sll);
+	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
+	new->type = 'P';
+	return (new);
 }
 
-void		add_to_list(t_sll **all_obj, t_sll *new_sll)
+
+t_obj		*create_sphere(char **tmp)
 {
-	t_sll		*tmp;
-//*****************************************Segfault ici**********************************************//
-	if (!(tmp = *all_obj))
-		ft_kill("error assigation");
-	if (!(*all_obj))
-		*all_obj = new_sll;
-	else
+	t_obj	*new;
+
+	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
+		return (NULL);
+	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+	new->r = ft_atof(tmp[4]);
+	new->clr = create_color(ft_atof(tmp[5]), ft_atof(tmp[6]),
+	ft_atof(tmp[7]), ft_atof(tmp[8]));
+	new->id = ft_atoi(tmp[9]);
+	new->type = 'S';
+	return (new);
+}
+
+static void		add_to_list(t_obj **obj, t_obj *new_obj)
+{
+	t_obj		*tmp;
+
+	if (!obj || !new_obj)
+		return ;
+	tmp = *obj;
+	new_obj->next = NULL;
+	if (!tmp)
 	{
-		while (tmp->next)
-			tmp = tmp->next;
-		new_sll->next = NULL;
-		tmp->next = new_sll;
+		*obj = new_obj;
+		return ;
 	}
+	while (tmp->next)
+		tmp = tmp->next;
+	tmp->next = new_obj;
 }
 
-t_obj		*create_obj(t_obj *ref)
+t_obj		*create_spot(char **tmp)
 {
-	t_obj	*obj;
+	t_obj	*new;
 
-	if (!(obj = (t_obj *)malloc(sizeof(t_obj))))
+	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
 		return (NULL);
-	obj->type = ref->type;
-	obj->pos = ref->pos;
-	obj->clr = ref->clr;
-	obj->id = ref->id;
-	obj->r = ref->r;
-	return (obj);
+	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+	new->ray.pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
+	new->type = 'L';
+	return (new);
 }
 
-void		get_info(char **tmp, t_obj *ref)
-{
-	bzero(ref, sizeof(t_obj));
-	//fonction() de check des veleurs selon l'objet;
-	if (tmp[0][0] == 'S')
-		create_sphere(tmp, ref);
-}
-
-void		get_scene(int fd, t_all *all)
+t_obj		*get_scene(int fd, t_all *all)
 {
 	int		val;
-	t_obj	ref;
 	t_obj	*new_obj;
-	t_sll	**all_obj;
-	t_sll	*new_sll;
+	t_obj	*obj;
 
-	all_obj = NULL;
+	obj = NULL;
 	while ((val = get_next_line(fd, &all->line)) == 1)
 	{
 		all->tmp = ft_strsplit(all->line, '\t');
-		get_info(all->tmp, &ref);
 		if (all->tmp[0][0] == 'S')
-		{
-			new_obj = create_obj(&ref);
-			new_sll = create_sll(new_obj);
-			printf("%f\n", new_obj->r);
-			add_to_list(all_obj, new_sll);
-		}
-		// free_tab(all->tmp);
+			new_obj = create_sphere(all->tmp);
+		if (all->tmp[0][0] == 'L')
+			new_obj = create_spot(all->tmp);
+		if (all->tmp[0][0] == 'P')
+			new_obj = create_plan(all->tmp);
+		add_to_list(&obj, new_obj);
+		free_tab(all->tmp);
 	}
+	return (obj);
 }
 
 int			main(int argc, char **argv)
@@ -413,12 +395,8 @@ int			main(int argc, char **argv)
 	if (!(all->fd = open(argv[1], O_RDONLY)))
 		ft_kill("fd error");
 	all->camera = init_cam(0, 0, -(double)WIDTH);
-	get_scene(all->fd, all);
-	// all->spot = create_spot(227, 290, -150, 0.1);
-	// all->spot.clr = create_color(1, 1, 1, 0);
-	// all->sph = create_sphere(0, 50, 200);
-	// all->plan = create_plan(0, -80, 0);
-	// all->plan.clr = create_color(0.5, 0.5, 0.5, 1);
+	all->head = get_scene(all->fd, all);
+	print_tab(all->head);
 	raytracing(all);
 	mlx_put_image_to_window(all->env->mlx, all->env->win, all->env->img, 0, 0);
 	mlx_hook(all->env->win, 17, (1L << 17), proper_exit, &all);
