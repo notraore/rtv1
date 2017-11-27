@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   error.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <notraore@student.42.fr>          +#+  +:+       +#+        */
+/*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:07:14 by notraore          #+#    #+#             */
-/*   Updated: 2017/10/18 18:25:16 by notraore         ###   ########.fr       */
+/*   Updated: 2017/11/27 22:33:40 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,19 @@ void	ft_print_err(int argc)
 void	ft_help(void)
 {
 	ft_putendl("usage : ./rtv1 [scene]\n");
-	ft_putendl("\t\tScene instruction:");
-	ft_putendl("First line: widht heigth");
-	ft_putstr("second line: number of sphere, ");
-	ft_putendl("number of material, number of light");
-	ft_putendl("third line: je sais pas encore");
+	ft_putendl("\t\t\t\t\t\t\t\tScene instruction:\n");
+	ft_putstr("'S' for sphere -> ");
+	ft_putstr("Separated by tabulation enter the xPos, yPos, zPos, radius ");
+	ft_putendl("and normalized red, green, blue, alpha colors.\n");
+	ft_putstr("'L' for Light -> ");
+	ft_putstr("Separated by tabulation enter the xPos, yPos, zPos ");
+	ft_putendl("and normalized red, green, blue, alpha colors.\n");
+	ft_putstr("'C' for Cylinder -> ");
+	ft_putendl("Separated by tabulation enter the xPos, yPos, zPos, radius\n");
+	ft_putstr("'K' for Cone -> ");
+	ft_putendl("Separated by tabulation enter the xPos, yPos, zPos\n");
+	ft_putstr("'P' for Plan -> ");
+	ft_putstr("Separated by tabulation enter the xPos, yPos, zPos");
+	ft_putendl(" and normalized Red, Green, Blue and Alpha colors.");
 	exit(EXIT_FAILURE);
 }

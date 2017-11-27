@@ -6,26 +6,11 @@
 /*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:07:14 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/27 19:30:13 by nobila           ###   ########.fr       */
+/*   Updated: 2017/11/27 22:35:26 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../rtv1.h"
-
-// static void			ft_last_fd(t_sph **file, int fd)
-// {
-// 	t_sph *tmp;
-
-// 	tmp = *file;
-// 	if (!tmp)
-// 		*file = ft_create_fd(fd);
-// 	else
-// 	{
-// 		while (tmp->next)
-// 			tmp = tmp->next;
-// 		tmp->next = ft_create_fd(fd);
-// 	}
-// }
 
 t_v			create_vector(double x, double y, double z)
 {
@@ -242,10 +227,7 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 	angle = dot_product(&d, &all->normal);
 	if (angle <= 0)
 		return (create_color(0, 0, 0, 0));
-	// all->shadow.pos = all->hit;
-	// all->shadow.dir = vector_sub(&light->pos, &all->hit);
-	// if (cast_shadow(all) == true)
-	// 	return (create_color(0, 0, 0, 0));
+
 	clr.r = tmp->clr.r * light->clr.r * angle;
 	clr.g = tmp->clr.g * light->clr.g * angle;
 	clr.b = tmp->clr.b * light->clr.b * angle;
@@ -396,6 +378,8 @@ t_obj		*get_scene(int fd, t_all *all)
 		add_to_list(&obj, new_obj);
 		free_tab(all->tmp);
 	}
+	if (!obj)
+		ft_kill("No scene found, sorry m8.");
 	return (obj);
 }
 
@@ -405,18 +389,17 @@ int			main(int argc, char **argv)
 	t_all		*all;
 
 	if (argc < 2)
-		ft_kill("no arguments");
+		ft_help();
 	all = (t_all *)malloc(sizeof(t_all));
+	(!(all->fd = open(argv[1], O_RDONLY)) ? ft_kill("fuck") : 0);
+	all->head = get_scene(all->fd, all);
 	all->env = &mlx;
 	all->env->mlx = mlx_init();
 	all->env->win = mlx_new_window(all->env->mlx, WIDTH, HEIGHT, "RTv1");
 	all->env->img = mlx_new_image(all->env->mlx, WIDTH, HEIGHT);
 	all->env->data = mlx_get_data_addr(all->env->img, &all->env->bpp,
 	&all->env->sl, &all->env->end);
-	if (!(all->fd = open(argv[1], O_RDONLY)))
-		ft_kill("fd error");
 	all->camera = init_cam(0, 0, -(double)WIDTH);
-	all->head = get_scene(all->fd, all);
 	raytracing(all);
 	mlx_put_image_to_window(all->env->mlx, all->env->win, all->env->img, 0, 0);
 	mlx_hook(all->env->win, 17, (1L << 17), proper_exit, &all);
