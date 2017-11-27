@@ -6,7 +6,7 @@
 /*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:07:14 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/25 23:49:17 by nobila           ###   ########.fr       */
+/*   Updated: 2017/11/27 19:30:13 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,16 @@ t_ray		init_ray(t_all *all, int x1, int y1)
 	return (ray);
 }
 
+void		init_lst(t_all *all)
+{
+	all->o_tmp = all->head;
+	all->lght = all->head;
+	all->plan = all->head;
+	while (all->lght->type != 'L')
+		all->lght = all->lght->next;
+	while (all->plan->type != 'P')
+		all->plan = all->plan->next;
+}
 
 t_color		create_color(double r, double g, double b, double a)
 {
@@ -94,8 +104,6 @@ t_color		create_color(double r, double g, double b, double a)
 	clr.a = a;
 	return (clr);
 }
-
-
 
 // bool		cast_cyl(t_all *all, t_ray *ray, t_cyl *cyl)
 // {
@@ -171,6 +179,21 @@ bool		cast_sphere(t_all *all, t_ray *ray, t_obj *obj)
 	return (false);
 }
 
+bool		cast_shadow(t_all *all)
+{
+	t_obj	*temp;
+
+	temp = all->head;
+	while (temp)
+	{
+		if (cast_sphere(all, &all->shadow, temp) == true)
+			return (true);
+		temp = temp->next;
+	}
+	temp = all->head;
+	return (false);
+}
+
 t_color		cast_light_plan(t_all *all, t_obj *plan, t_obj *light)
 {
 	t_color		clr;
@@ -179,16 +202,16 @@ t_color		cast_light_plan(t_all *all, t_obj *plan, t_obj *light)
 
 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
 	all->hit = vector_add(&all->ray.pos, &all->hit);
-	light->ray.dir = vector_sub(&light->pos, &all->hit);
+	light->ray.dir = vector_sub(&light->ray.pos, &all->hit);
 	light->ray.dir = vector_normalize(&light->ray.dir);
 	d = vector_mult_scal(&light->ray.dir, (-1.0));
 	angle = dot_product(&d, &all->vecdiry);
 	if (angle <= 0)
 		return (create_color(0, 0, 0, 0));
-	// all->shadow.dir = vector_sub(&all->hit, &light->pos);
-	// all->shadow.pos = all->hit;
-	// if (cast_sphere(all, &all->shadow, all->o_tmp) == true)
-	// 	return (create_color(0, 0, 0, 0));
+	all->shadow.pos = all->hit;
+	all->shadow.dir = vector_sub(&light->pos, &all->hit);
+	if (cast_shadow(all) == true)
+		return (create_color(0, 0, 0, 0));
 	clr.r = plan->clr.r * light->clr.r * angle;
 	clr.g = plan->clr.g * light->clr.g * angle;
 	clr.b = plan->clr.b * light->clr.b * angle;
@@ -213,15 +236,15 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 	all->hit = vector_add(&all->ray.pos, &all->hit);
 	all->normal = vector_sub(&tmp->pos, &all->hit);
 	all->normal = vector_div_scal(&all->normal, tmp->r);
-	light->ray.dir = vector_sub(&light->pos, &all->hit);
+	light->ray.dir = vector_sub(&light->ray.pos, &all->hit);
 	light->ray.dir = vector_normalize(&light->ray.dir);
 	d = vector_mult_scal(&light->ray.dir, (-1.0));
 	angle = dot_product(&d, &all->normal);
 	if (angle <= 0)
 		return (create_color(0, 0, 0, 0));
-	// all->shadow.dir = vector_sub(&all->hit, &light->pos);
 	// all->shadow.pos = all->hit;
-	// if (cast_sphere(all, &all->shadow, all->o_tmp) == true)
+	// all->shadow.dir = vector_sub(&light->pos, &all->hit);
+	// if (cast_shadow(all) == true)
 	// 	return (create_color(0, 0, 0, 0));
 	clr.r = tmp->clr.r * light->clr.r * angle;
 	clr.g = tmp->clr.g * light->clr.g * angle;
@@ -242,52 +265,48 @@ void	print_tab(t_obj *some)
 			printf("tmp->pos.y = %f | ", tmp->pos.y);
 			printf("tmp->pos.z = %f | ", tmp->pos.z);
 			printf("tmp->r = %f | ", tmp->r);
-			printf("tmp->id = %d\n", tmp->id);
 			tmp = tmp->next;
 		}
+}
+
+void		cast_something(t_all *all)
+{
+	all->clr = create_color(0.01, 0.01, 0.01, 0);
+	while (all->o_tmp)
+	{
+		if (cast_plan(all, &all->ray, all->plan) == true && all->dist > all->t)
+		{
+			all->dist = all->t;
+			all->clr = cast_light_plan(all, all->plan, all->lght);
+		}
+		if (cast_sphere(all, &all->ray, all->o_tmp) == true && all->dist > all->t)
+		{
+			all->dist = all->t;
+			all->clr = cast_light(all, all->o_tmp, all->lght);
+		}
+		all->o_tmp = all->o_tmp->next;
+	}
 }
 
 void		raytracing(t_all *all)
 {
 	int			x1;
 	int			y1;
-	t_obj		*lght;
-	t_obj		*plan;
-	t_color		clr;
 
 	all->y = 0;
-	all->o_tmp = all->head;
-	lght = all->head;
-	plan = all->head;
-	while (lght->type != 'L')
-		lght = lght->next;
-	while (plan->type != 'P')
-		plan = plan->next;
+	init_lst(all);
 	y1 = (HEIGHT / 2);
 	while (all->y < HEIGHT)
 	{
 		all->x = 0;
+		all->tof = 0;
 		x1 = -(WIDTH / 2);
 		while (all->x < WIDTH)
 		{
-			all->dist = 20000;
+			all->dist = 200000;
 			all->ray = init_ray(all, x1, y1);
-			while (all->o_tmp)
-			{
-				if (cast_sphere(all, &all->ray, all->o_tmp) == true && all->dist > all->t)
-				{
-					all->dist = all->t;
-					clr = cast_light(all, all->o_tmp, lght);
-				}
-				if (cast_plan(all, &all->ray, plan) == true && all->dist > all->t)
-				{
-					all->dist = all->t;
-					clr = cast_light_plan(all, plan, lght);
-				}
-				all->o_tmp = all->o_tmp->next;
-			}
-			pixel_puts(&clr, all);
-			clr = create_color(0.04, 0.04, 0.04, 0);
+			cast_something(all);
+			pixel_puts(&all->clr, all);
 			all->x++;
 			x1++;
 			all->o_tmp = all->head;
@@ -306,6 +325,7 @@ t_obj		*create_plan(char **tmp)
 	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
 	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
 	new->type = 'P';
+	new->r = 0;
 	return (new);
 }
 
@@ -320,7 +340,6 @@ t_obj		*create_sphere(char **tmp)
 	new->r = ft_atof(tmp[4]);
 	new->clr = create_color(ft_atof(tmp[5]), ft_atof(tmp[6]),
 	ft_atof(tmp[7]), ft_atof(tmp[8]));
-	new->id = ft_atoi(tmp[9]);
 	new->type = 'S';
 	return (new);
 }
@@ -352,6 +371,7 @@ t_obj		*create_spot(char **tmp)
 	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
 	new->ray.pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
 	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
+	new->r = 0;
 	new->type = 'L';
 	return (new);
 }
@@ -366,6 +386,7 @@ t_obj		*get_scene(int fd, t_all *all)
 	while ((val = get_next_line(fd, &all->line)) == 1)
 	{
 		all->tmp = ft_strsplit(all->line, '\t');
+
 		if (all->tmp[0][0] == 'S')
 			new_obj = create_sphere(all->tmp);
 		if (all->tmp[0][0] == 'L')
@@ -396,7 +417,6 @@ int			main(int argc, char **argv)
 		ft_kill("fd error");
 	all->camera = init_cam(0, 0, -(double)WIDTH);
 	all->head = get_scene(all->fd, all);
-	print_tab(all->head);
 	raytracing(all);
 	mlx_put_image_to_window(all->env->mlx, all->env->win, all->env->img, 0, 0);
 	mlx_hook(all->env->win, 17, (1L << 17), proper_exit, &all);

@@ -6,7 +6,7 @@
 /*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:06:37 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/25 23:25:18 by nobila           ###   ########.fr       */
+/*   Updated: 2017/11/27 19:19:35 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,21 +81,11 @@ struct						s_color
 struct						s_obj
 {
 	t_v						pos;
-	int						id;
 	char					type;
 	double					r;
 	t_color					clr;
 	t_ray					ray;
 	struct s_obj			*next;
-};
-
-struct						s_spot
-{
-	t_v						pos;
-	t_ray					ray;
-	t_color					clr;
-	double					intens;
-	int						color;
 };
 
 struct						s_plan
@@ -114,7 +104,10 @@ struct						s_cam
 
 struct						s_all
 {
+	t_obj					*lght;
 	t_obj					*head;
+	t_obj					*plan;
+	t_color					clr;
 	t_v						normal;
 	t_v						hit;
 	t_mlx					*env;
@@ -122,7 +115,6 @@ struct						s_all
 	t_ray					ray;
 	t_ray					shadow;
 	t_obj					*obj;
-	t_spot					spot;
 	t_v						vecdirx;
 	t_v						vecdiry;
 	t_v						vecdirz;
@@ -138,6 +130,7 @@ struct						s_all
 	int						x;
 	int						y;
 	int						ind;
+	bool					tof;
 	double					t;
 	double					t1;
 	double					dist;
