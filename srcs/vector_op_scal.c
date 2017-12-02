@@ -59,3 +59,13 @@ double		vector_mult(t_v *base)
 {
 	return (sqrtf(base->x * base->x + base->y * base->y + base->z * base->z));
 }
+
+t_v			cross_product(t_v *base, t_v *targ)
+{
+	t_v	new;
+
+	new.x = base->y * targ->z - base->z * targ->y;
+	new.y = base->z * targ->x - base->x * targ->z;
+	new.z = base->x * targ->y - base->y * targ->x;
+	return (new);
+}

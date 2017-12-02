@@ -6,7 +6,7 @@
 /*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:06:37 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/27 19:19:35 by nobila           ###   ########.fr       */
+/*   Updated: 2017/12/02 17:48:40 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define RTV1_H
 
 # define WIDTH 1000
-# define HEIGHT 1000
+# define HEIGHT 900
 
 # define BLUE 0x0099FF
 # define FBLUE 0x00BFFF
@@ -24,6 +24,7 @@
 # define WHITE 0xFFFFFF
 # define YELLOW 0xFFFF00
 # define GREEN 0x00FF00
+# define PI 3.14159265359
 
 # include "./libft/libft.h"
 # include "./minilibx_macos/mlx.h"
@@ -162,6 +163,7 @@ double						vector_mult(t_v *base);
 ** vector_op.c
 */
 t_v							vector_sub(t_v *start, t_v *end);
+t_v							cross_product(t_v *base, t_v *targ);
 t_v							vector_add(t_v *base, t_v *add);
 double						vector_len(t_v *len);
 double						vector_colineaire(double a, double b, double c);

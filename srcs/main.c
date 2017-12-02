@@ -6,7 +6,7 @@
 /*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:07:14 by notraore          #+#    #+#             */
-/*   Updated: 2017/11/27 22:35:26 by nobila           ###   ########.fr       */
+/*   Updated: 2017/12/02 17:56:30 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,37 +90,6 @@ t_color		create_color(double r, double g, double b, double a)
 	return (clr);
 }
 
-// bool		cast_cyl(t_all *all, t_ray *ray, t_cyl *cyl)
-// {
-// 	double		a;
-// 	double		b;
-// 	double		c;
-// 	t_v			o;
-
-// 	// all->normal = vector_sub(&ray->dir, &cyl->pos);
-
-// 	o = vector_sub(&cyl->pos, &ray->pos);
-// 	a = dot_product(&ray->dir, &ray->dir) - pow(dot_product(&ray->dir, &all->vecdiry), 2);
-
-// 	b = 2 * dot_product(&ray->pos, &o) - (dot_product(&ray->dir, &all->vecdiry)) * (dot_product(&o, &all->vecdiry));
-
-// 	c = dot_product(&o, &o) - pow(dot_product(&o, &all->vecdiry), 2) - 50 * 50;
-
-// 	all->delta = b * b - 4 * a * c;
-// 	if (all->delta < 0)
-// 		return (false);
-// 	if (all->delta == 0)
-// 		all->delta = -b;
-// 	if (all->delta > 0)
-// 	{
-// 		all->t1 = (-b + sqrt(all->delta)) / (2 * a);
-// 		all->t2 = (-b - sqrt(all->delta)) / (2 * a);
-// 		all->t = all->t1 >= all->t2 ? all->t2 : all->t1;
-// 		return (true);
-// 	}
-// 	return (false);
-// }
-
 bool		cast_plan(t_all *all, t_ray *ray, t_obj *plan)
 {
 	t_v			o;
@@ -197,6 +166,14 @@ t_color		cast_light_plan(t_all *all, t_obj *plan, t_obj *light)
 	all->shadow.dir = vector_sub(&light->pos, &all->hit);
 	if (cast_shadow(all) == true)
 		return (create_color(0, 0, 0, 0));
+	int carre = (int)floor(all->hit.x) + (int)floor(all->hit.z);
+	if ((carre % 2) == 0)
+	{
+		clr.r = 0 * light->clr.r * angle;
+		clr.g = 0 * light->clr.g * angle;
+		clr.b = 0 * light->clr.b * angle;
+		return (clr);
+	}
 	clr.r = plan->clr.r * light->clr.r * angle;
 	clr.g = plan->clr.g * light->clr.g * angle;
 	clr.b = plan->clr.b * light->clr.b * angle;
@@ -215,10 +192,39 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 {
 	t_color		clr;
 	t_v			d;
+	t_v			vp;
+	t_v			vn;
+	t_v			ve;
+	int			u;
+	int			v;
+	double		theta;
 	double		angle;
 
 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
 	all->hit = vector_add(&all->ray.pos, &all->hit);
+
+	all->hit = vector_mult_scal(&all->ray.dir, all->t);
+	all->hit = vector_add(&all->ray.pos, &all->hit);
+	vn = all->o_tmp->pos;
+	vp = all->o_tmp->pos;
+	ve = all->o_tmp->pos;
+
+	vn.y += all->o_tmp->r;
+	ve.z -= all->o_tmp->r;
+	vp = vector_sub(&all->o_tmp->pos, &all->hit);
+	vn = vector_normalize(&vn);
+	vp = vector_normalize(&vp);
+	ve = vector_normalize(&ve);
+	double phi = acos(-dot_product(&vn, &vp));
+	v = phi / PI;
+	printf("phi = %f || v = %d\n", phi, v);
+	theta = (acos(dot_product(&vp, &ve) / sin(phi))) / pow(PI, 2);
+	t_v cross = cross_product(&vn, &ve);
+	if (dot_product(&cross, &vp) > 0)
+		u = theta;
+	else
+		u = 1 - theta;
+	printf("theta = %f\n", theta);
 	all->normal = vector_sub(&tmp->pos, &all->hit);
 	all->normal = vector_div_scal(&all->normal, tmp->r);
 	light->ray.dir = vector_sub(&light->ray.pos, &all->hit);
@@ -227,7 +233,14 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 	angle = dot_product(&d, &all->normal);
 	if (angle <= 0)
 		return (create_color(0, 0, 0, 0));
-
+	int carre = (int)floor(all->hit.x) + (int)floor(all->hit.y);
+	if ((carre % 2) == 0)
+	{
+		clr.r = 0 * light->clr.r * angle;
+		clr.g = 0 * light->clr.g * angle;
+		clr.b = 0 * light->clr.b * angle;
+		return (clr);
+	}
 	clr.r = tmp->clr.r * light->clr.r * angle;
 	clr.g = tmp->clr.g * light->clr.g * angle;
 	clr.b = tmp->clr.b * light->clr.b * angle;
@@ -387,6 +400,7 @@ int			main(int argc, char **argv)
 {
 	t_mlx		mlx;
 	t_all		*all;
+	void		*tex;
 
 	if (argc < 2)
 		ft_help();
@@ -399,6 +413,9 @@ int			main(int argc, char **argv)
 	all->env->img = mlx_new_image(all->env->mlx, WIDTH, HEIGHT);
 	all->env->data = mlx_get_data_addr(all->env->img, &all->env->bpp,
 	&all->env->sl, &all->env->end);
+	if (!((tex = mlx_xpm_file_to_image(all->env->mlx,
+	"./map_texture_11.xpm", &(all->env->sl), &all->env->bpp))))
+	ft_kill("Texture error");
 	all->camera = init_cam(0, 0, -(double)WIDTH);
 	raytracing(all);
 	mlx_put_image_to_window(all->env->mlx, all->env->win, all->env->img, 0, 0);
