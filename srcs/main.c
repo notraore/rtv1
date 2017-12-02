@@ -6,7 +6,7 @@
 /*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/09/20 22:07:14 by notraore          #+#    #+#             */
-/*   Updated: 2017/12/02 17:56:30 by nobila           ###   ########.fr       */
+/*   Updated: 2017/12/02 23:52:41 by nobila           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,14 +217,14 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 	ve = vector_normalize(&ve);
 	double phi = acos(-dot_product(&vn, &vp));
 	v = phi / PI;
-	printf("phi = %f || v = %d\n", phi, v);
+	// printf("phi = %f || v = %d\n", phi, v);
 	theta = (acos(dot_product(&vp, &ve) / sin(phi))) / pow(PI, 2);
 	t_v cross = cross_product(&vn, &ve);
 	if (dot_product(&cross, &vp) > 0)
 		u = theta;
 	else
 		u = 1 - theta;
-	printf("theta = %f\n", theta);
+	// printf("theta = %f\n", theta);
 	all->normal = vector_sub(&tmp->pos, &all->hit);
 	all->normal = vector_div_scal(&all->normal, tmp->r);
 	light->ray.dir = vector_sub(&light->ray.pos, &all->hit);
@@ -287,6 +287,7 @@ void		raytracing(t_all *all)
 {
 	int			x1;
 	int			y1;
+	t_color		aaclr;
 
 	all->y = 0;
 	init_lst(all);
@@ -299,9 +300,22 @@ void		raytracing(t_all *all)
 		while (all->x < WIDTH)
 		{
 			all->dist = 200000;
-			all->ray = init_ray(all, x1, y1);
-			cast_something(all);
-			pixel_puts(&all->clr, all);
+			aaclr = create_color(0, 0, 0, 0);
+			for (int sample = 0; sample <= 0.5; sample++)
+			{
+				all->ray = init_ray(all, x1 + sample, y1 + sample);
+				cast_something(all);
+				aaclr.r += all->clr.r;
+				aaclr.g += all->clr.g;
+				aaclr.b += all->clr.b;
+				// printf("all->r = %f || all->g = %f || all->b = %f\n", all->clr.r, all->clr.g, all->clr.b);
+				// printf("aar = %f || aag = %f || aab = %f\n", aaclr.r, aaclr.g, aaclr.b);
+			}
+			aaclr.r /= 2;
+			aaclr.g /= 2;
+			aaclr.b /= 2;
+			if (all->x > 0 && all->x < WIDTH && all->y < HEIGHT && all->y > 0)
+				pixel_puts(&aaclr, all);
 			all->x++;
 			x1++;
 			all->o_tmp = all->head;
