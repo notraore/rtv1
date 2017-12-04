@@ -192,12 +192,12 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 {
 	t_color		clr;
 	t_v			d;
-	t_v			vp;
-	t_v			vn;
-	t_v			ve;
-	int			u;
-	int			v;
-	double		theta;
+	// t_v			vp;
+	// t_v			vn;
+	// t_v			ve;
+	// int			u;
+	// int			v;
+	// double		theta;
 	double		angle;
 
 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
@@ -205,25 +205,25 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 
 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
 	all->hit = vector_add(&all->ray.pos, &all->hit);
-	vn = all->o_tmp->pos;
-	vp = all->o_tmp->pos;
-	ve = all->o_tmp->pos;
+	// vn = all->o_tmp->pos;
+	// vp = all->o_tmp->pos;
+	// ve = all->o_tmp->pos;
 
-	vn.y += all->o_tmp->r;
-	ve.z -= all->o_tmp->r;
-	vp = vector_sub(&all->o_tmp->pos, &all->hit);
-	vn = vector_normalize(&vn);
-	vp = vector_normalize(&vp);
-	ve = vector_normalize(&ve);
-	double phi = acos(-dot_product(&vn, &vp));
-	v = phi / PI;
-	// printf("phi = %f || v = %d\n", phi, v);
-	theta = (acos(dot_product(&vp, &ve) / sin(phi))) / pow(PI, 2);
-	t_v cross = cross_product(&vn, &ve);
-	if (dot_product(&cross, &vp) > 0)
-		u = theta;
-	else
-		u = 1 - theta;
+	// vn.y += all->o_tmp->r;
+	// ve.z -= all->o_tmp->r;
+	// vp = vector_sub(&all->o_tmp->pos, &all->hit);
+	// vn = vector_normalize(&vn);
+	// vp = vector_normalize(&vp);
+	// ve = vector_normalize(&ve);
+	// double phi = acos(-dot_product(&vn, &vp));
+	// v = phi / PI;
+	// // printf("phi = %f || v = %d\n", phi, v);
+	// theta = (acos(dot_product(&vp, &ve) / sin(phi))) / pow(PI, 2);
+	// t_v cross = cross_product(&vn, &ve);
+	// if (dot_product(&cross, &vp) > 0)
+	// 	u = theta;
+	// else
+	// 	u = 1 - theta;
 	// printf("theta = %f\n", theta);
 	all->normal = vector_sub(&tmp->pos, &all->hit);
 	all->normal = vector_div_scal(&all->normal, tmp->r);
@@ -264,6 +264,11 @@ void	print_tab(t_obj *some)
 		}
 }
 
+t_color		get_texture_info(int x, int y, char *tex, t_all *all)
+{
+	all->clr.r = tex[x + y * all->i_sl];
+}
+
 void		cast_something(t_all *all)
 {
 	all->clr = create_color(0.01, 0.01, 0.01, 0);
@@ -277,7 +282,8 @@ void		cast_something(t_all *all)
 		if (cast_sphere(all, &all->ray, all->o_tmp) == true && all->dist > all->t)
 		{
 			all->dist = all->t;
-			all->clr = cast_light(all, all->o_tmp, all->lght);
+			// all->clr = cast_light(all, all->o_tmp, all->lght);
+			all->clr = get_texture_info(all->x, all->y,  all->i_tex);
 		}
 		all->o_tmp = all->o_tmp->next;
 	}
@@ -287,7 +293,6 @@ void		raytracing(t_all *all)
 {
 	int			x1;
 	int			y1;
-	t_color		aaclr;
 
 	all->y = 0;
 	init_lst(all);
@@ -295,27 +300,14 @@ void		raytracing(t_all *all)
 	while (all->y < HEIGHT)
 	{
 		all->x = 0;
-		all->tof = 0;
 		x1 = -(WIDTH / 2);
 		while (all->x < WIDTH)
 		{
 			all->dist = 200000;
-			aaclr = create_color(0, 0, 0, 0);
-			for (int sample = 0; sample <= 0.5; sample++)
-			{
-				all->ray = init_ray(all, x1 + sample, y1 + sample);
-				cast_something(all);
-				aaclr.r += all->clr.r;
-				aaclr.g += all->clr.g;
-				aaclr.b += all->clr.b;
-				// printf("all->r = %f || all->g = %f || all->b = %f\n", all->clr.r, all->clr.g, all->clr.b);
-				// printf("aar = %f || aag = %f || aab = %f\n", aaclr.r, aaclr.g, aaclr.b);
-			}
-			aaclr.r /= 2;
-			aaclr.g /= 2;
-			aaclr.b /= 2;
-			if (all->x > 0 && all->x < WIDTH && all->y < HEIGHT && all->y > 0)
-				pixel_puts(&aaclr, all);
+			all->ray = init_ray(all, x1, y1);
+			cast_something(all);
+			// if (all->x > 0 && all->x < WIDTH && all->y < HEIGHT && all->y > 0)
+				pixel_puts(&all->clr, all);
 			all->x++;
 			x1++;
 			all->o_tmp = all->head;
@@ -430,6 +422,7 @@ int			main(int argc, char **argv)
 	if (!((tex = mlx_xpm_file_to_image(all->env->mlx,
 	"./map_texture_11.xpm", &(all->env->sl), &all->env->bpp))))
 	ft_kill("Texture error");
+	all->i_tex = mlx_get_data_addr(all->env->mlx, &all->i_bpp, &all->i_sl, &all->i_sl);
 	all->camera = init_cam(0, 0, -(double)WIDTH);
 	raytracing(all);
 	mlx_put_image_to_window(all->env->mlx, all->env->win, all->env->img, 0, 0);
