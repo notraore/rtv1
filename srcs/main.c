@@ -185,7 +185,15 @@ void		pixel_puts(t_color *clr, t_all *all)
 	all->env->data[(all->x + all->y * WIDTH) * 4] = clr->b * 255.0;
 	all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = clr->g * 255.0;
 	all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = clr->r * 255.0;
-	all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = clr->a * 255.0;
+	// all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = clr->a * 255.0;
+}
+
+void		t_pixel_puts(t_all *all)
+{
+	all->env->data[(all->x + all->y * WIDTH) * 4] = all->i_tex[(all->x % 1136 + all->y % 295 * WIDTH) * 4];
+	all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = all->i_tex[(all->x % 1136 + all->y % 295 * WIDTH) * 4 + 1];
+	all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = all->i_tex[(all->x % 1136 + all->y % 295 * WIDTH) * 4 + 2];
+	// all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = all->i_tex[(all->x + all->y * WIDTH) * 4 + 3];
 }
 
 t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
@@ -199,10 +207,6 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 	// int			v;
 	// double		theta;
 	double		angle;
-
-	all->hit = vector_mult_scal(&all->ray.dir, all->t);
-	all->hit = vector_add(&all->ray.pos, &all->hit);
-
 	all->hit = vector_mult_scal(&all->ray.dir, all->t);
 	all->hit = vector_add(&all->ray.pos, &all->hit);
 	// vn = all->o_tmp->pos;
@@ -266,7 +270,10 @@ void	print_tab(t_obj *some)
 
 t_color		get_texture_info(int x, int y, char *tex, t_all *all)
 {
-	all->clr.r = tex[x + y * all->i_sl];
+	t_color clr;
+
+	clr.r = tex[x + y * all->i_sl];
+	return (clr);
 }
 
 void		cast_something(t_all *all)
@@ -283,7 +290,7 @@ void		cast_something(t_all *all)
 		{
 			all->dist = all->t;
 			// all->clr = cast_light(all, all->o_tmp, all->lght);
-			all->clr = get_texture_info(all->x, all->y,  all->i_tex);
+			// all->clr = get_texture_info(all->x, all->y,  all->i_tex, all);
 		}
 		all->o_tmp = all->o_tmp->next;
 	}
@@ -307,7 +314,7 @@ void		raytracing(t_all *all)
 			all->ray = init_ray(all, x1, y1);
 			cast_something(all);
 			// if (all->x > 0 && all->x < WIDTH && all->y < HEIGHT && all->y > 0)
-				pixel_puts(&all->clr, all);
+			t_pixel_puts(all);
 			all->x++;
 			x1++;
 			all->o_tmp = all->head;
