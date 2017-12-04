@@ -14,7 +14,7 @@
 # define RTV1_H
 
 # define WIDTH 1000
-# define HEIGHT 600
+# define HEIGHT 1000
 
 # define BLUE 0x0099FF
 # define FBLUE 0x00BFFF
@@ -132,6 +132,7 @@ struct						s_all
 	int						i_bpp;
 	int						i_end;
 	int						i_sl;
+	int						naz;
 
 	int						x;
 	int						y;

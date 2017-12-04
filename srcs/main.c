@@ -185,15 +185,7 @@ void		pixel_puts(t_color *clr, t_all *all)
 	all->env->data[(all->x + all->y * WIDTH) * 4] = clr->b * 255.0;
 	all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = clr->g * 255.0;
 	all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = clr->r * 255.0;
-	// all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = clr->a * 255.0;
-}
-
-void		t_pixel_puts(t_all *all)
-{
-	all->env->data[(all->x + all->y * WIDTH) * 4] = all->i_tex[(all->x % 1136 + all->y % 295 * WIDTH) * 4];
-	all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = all->i_tex[(all->x % 1136 + all->y % 295 * WIDTH) * 4 + 1];
-	all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = all->i_tex[(all->x % 1136 + all->y % 295 * WIDTH) * 4 + 2];
-	// all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = all->i_tex[(all->x + all->y * WIDTH) * 4 + 3];
+	all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = clr->a * 255.0;
 }
 
 t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
@@ -227,7 +219,7 @@ t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
 	// if (dot_product(&cross, &vp) > 0)
 	// 	u = theta;
 	// else
-	// 	u = 1 - theta;
+		// u = 1 - theta;
 	// printf("theta = %f\n", theta);
 	all->normal = vector_sub(&tmp->pos, &all->hit);
 	all->normal = vector_div_scal(&all->normal, tmp->r);
@@ -270,168 +262,195 @@ void	print_tab(t_obj *some)
 
 t_color		get_texture_info(int x, int y, char *tex, t_all *all)
 {
-	t_color clr;
+	int nb;
+	t_color		clr;
 
-	clr.r = tex[x + y * all->i_sl];
+	printf("i_sl = %d\n", all->i_sl);
+	nb = (x) + (y + WIDTH);
+
+	clr.r = tex[nb];
+	clr.g = tex[nb + 1];
+	clr.b = tex[nb + 2];
+	clr.a = tex[nb + 3];
 	return (clr);
 }
 
 void		cast_something(t_all *all)
 {
-	all->clr = create_color(0.01, 0.01, 0.01, 0);
-	while (all->o_tmp)
-	{
-		if (cast_plan(all, &all->ray, all->plan) == true && all->dist > all->t)
-		{
-			all->dist = all->t;
-			all->clr = cast_light_plan(all, all->plan, all->lght);
-		}
-		if (cast_sphere(all, &all->ray, all->o_tmp) == true && all->dist > all->t)
-		{
-			all->dist = all->t;
-			// all->clr = cast_light(all, all->o_tmp, all->lght);
-			// all->clr = get_texture_info(all->x, all->y,  all->i_tex, all);
-		}
-		all->o_tmp = all->o_tmp->next;
-	}
+// 	all->clr = create_color(0.01, 0.01, 0.01, 0);
+// 	while (all->o_tmp)
+// 	{
+// 		if (cast_plan(all, &all->ray, all->plan) == true && all->dist > all->t)
+// 		{
+// 			all->dist = all->t;
+// 			all->clr = cast_light_plan(all, all->plan, all->lght);
+// 		}
+// 		if (cast_sphere(all, &all->ray, all->o_tmp) == true && all->dist > all->t)
+// 		{
+// 			all->dist = all->t;
+// 			all->clr = cast_light(all, all->o_tmp, all->lght);
+			all->clr = get_texture_info(all->x, all->y,  all->i_tex, all);
+
+		// }
+		// all->o_tmp = all->o_tmp->next;
+	// }
 }
 
-void		raytracing(t_all *all)
-{
-	int			x1;
-	int			y1;
+// void		raytracing(t_all *all)
+// {
+// 	int			x1;
+// 	int			y1;
 
-	all->y = 0;
-	init_lst(all);
-	y1 = (HEIGHT / 2);
-	while (all->y < HEIGHT)
-	{
-		all->x = 0;
-		x1 = -(WIDTH / 2);
-		while (all->x < WIDTH)
-		{
-			all->dist = 200000;
-			all->ray = init_ray(all, x1, y1);
-			cast_something(all);
-			// if (all->x > 0 && all->x < WIDTH && all->y < HEIGHT && all->y > 0)
-			t_pixel_puts(all);
-			all->x++;
-			x1++;
-			all->o_tmp = all->head;
-		}
-		all->y++;
-		y1--;
-	}
-}
+// 	all->y = 0;
+// 	init_lst(all);
+// 	y1 = (HEIGHT / 2);
+// 	while (all->y < HEIGHT)
+// 	{
+// 		all->x = 0;
+// 		x1 = -(WIDTH / 2);
+// 		while (all->x < WIDTH)
+// 		{
+// 			all->dist = 200000;
+// 			all->ray = init_ray(all, x1, y1);
+// 			cast_something(all);
+// 			if (all->x > 0 && all->x < WIDTH && all->y < HEIGHT && all->y > 0)
+// 				pixel_puts(&all->clr, all);
+// 				// t_pixel_puts(all);
+// 			all->x++;
+// 			x1++;
+// 			all->o_tmp = all->head;
+// 		}
+// 		all->y++;
+// 		y1--;
+// 	}
+// }
 
-t_obj		*create_plan(char **tmp)
-{
-	t_obj		*new;
+// t_obj		*create_plan(char **tmp)
+// {
+// 	t_obj		*new;
 
-	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
-		return (NULL);
-	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
-	new->type = 'P';
-	new->r = 0;
-	return (new);
-}
+// 	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
+// 		return (NULL);
+// 	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+// 	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
+// 	new->type = 'P';
+// 	new->r = 0;
+// 	return (new);
+// }
 
 
-t_obj		*create_sphere(char **tmp)
-{
-	t_obj	*new;
+// t_obj		*create_sphere(char **tmp)
+// {
+// 	t_obj	*new;
 
-	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
-		return (NULL);
-	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	new->r = ft_atof(tmp[4]);
-	new->clr = create_color(ft_atof(tmp[5]), ft_atof(tmp[6]),
-	ft_atof(tmp[7]), ft_atof(tmp[8]));
-	new->type = 'S';
-	return (new);
-}
+// 	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
+// 		return (NULL);
+// 	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+// 	new->r = ft_atof(tmp[4]);
+// 	new->clr = create_color(ft_atof(tmp[5]), ft_atof(tmp[6]),
+// 	ft_atof(tmp[7]), ft_atof(tmp[8]));
+// 	new->type = 'S';
+// 	return (new);
+// }
 
-static void		add_to_list(t_obj **obj, t_obj *new_obj)
-{
-	t_obj		*tmp;
+// static void		add_to_list(t_obj **obj, t_obj *new_obj)
+// {
+// 	t_obj		*tmp;
 
-	if (!obj || !new_obj)
-		return ;
-	tmp = *obj;
-	new_obj->next = NULL;
-	if (!tmp)
-	{
-		*obj = new_obj;
-		return ;
-	}
-	while (tmp->next)
-		tmp = tmp->next;
-	tmp->next = new_obj;
-}
+// 	if (!obj || !new_obj)
+// 		return ;
+// 	tmp = *obj;
+// 	new_obj->next = NULL;
+// 	if (!tmp)
+// 	{
+// 		*obj = new_obj;
+// 		return ;
+// 	}
+// 	while (tmp->next)
+// 		tmp = tmp->next;
+// 	tmp->next = new_obj;
+// }
 
-t_obj		*create_spot(char **tmp)
-{
-	t_obj	*new;
+// t_obj		*create_spot(char **tmp)
+// {
+// 	t_obj	*new;
 
-	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
-		return (NULL);
-	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	new->ray.pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
-	new->r = 0;
-	new->type = 'L';
-	return (new);
-}
+// 	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
+// 		return (NULL);
+// 	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+// 	new->ray.pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
+// 	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
+// 	new->r = 0;
+// 	new->type = 'L';
+// 	return (new);
+// }
 
-t_obj		*get_scene(int fd, t_all *all)
-{
-	int		val;
-	t_obj	*new_obj;
-	t_obj	*obj;
+// t_obj		*get_scene(int fd, t_all *all)
+// {
+// 	int		val;
+// 	t_obj	*new_obj;
+// 	t_obj	*obj;
 
-	obj = NULL;
-	while ((val = get_next_line(fd, &all->line)) == 1)
-	{
-		all->tmp = ft_strsplit(all->line, '\t');
+// 	obj = NULL;
+// 	while ((val = get_next_line(fd, &all->line)) == 1)
+// 	{
+// 		all->tmp = ft_strsplit(all->line, '\t');
 
-		if (all->tmp[0][0] == 'S')
-			new_obj = create_sphere(all->tmp);
-		if (all->tmp[0][0] == 'L')
-			new_obj = create_spot(all->tmp);
-		if (all->tmp[0][0] == 'P')
-			new_obj = create_plan(all->tmp);
-		add_to_list(&obj, new_obj);
-		free_tab(all->tmp);
-	}
-	if (!obj)
-		ft_kill("No scene found, sorry m8.");
-	return (obj);
-}
+// 		if (all->tmp[0][0] == 'S')
+// 			new_obj = create_sphere(all->tmp);
+// 		if (all->tmp[0][0] == 'L')
+// 			new_obj = create_spot(all->tmp);
+// 		if (all->tmp[0][0] == 'P')
+// 			new_obj = create_plan(all->tmp);
+// 		add_to_list(&obj, new_obj);
+// 		free_tab(all->tmp);
+// 	}
+// 	if (!obj)
+// 		ft_kill("No scene found, sorry m8.");
+// 	return (obj);
+// }
 
 int			main(int argc, char **argv)
 {
 	t_mlx		mlx;
 	t_all		*all;
 	void		*tex;
+	double		value = 255;
 
 	if (argc < 2)
 		ft_help();
+	(void)argv;
 	all = (t_all *)malloc(sizeof(t_all));
-	(!(all->fd = open(argv[1], O_RDONLY)) ? ft_kill("fuck") : 0);
-	all->head = get_scene(all->fd, all);
+	// (!(all->fd = open(argv[1], O_RDONLY)) ? ft_kill("fuck") : 0);
+	// all->head = get_scene(all->fd, all);
 	all->env = &mlx;
 	all->env->mlx = mlx_init();
 	all->env->win = mlx_new_window(all->env->mlx, WIDTH, HEIGHT, "RTv1");
 	all->env->img = mlx_new_image(all->env->mlx, WIDTH, HEIGHT);
-	all->env->data = mlx_get_data_addr(all->env->img, &all->env->bpp,
-	&all->env->sl, &all->env->end);
+	// all->env->data = mlx_get_data_addr(all->env->img, &all->env->bpp,
+	// &all->env->sl, &all->env->end);
 	if (!((tex = mlx_xpm_file_to_image(all->env->mlx,
-	"./map_texture_11.xpm", &(all->env->sl), &all->env->bpp))))
-	ft_kill("Texture error");
-	all->i_tex = mlx_get_data_addr(all->env->mlx, &all->i_bpp, &all->i_sl, &all->i_sl);
-	all->camera = init_cam(0, 0, -(double)WIDTH);
-	raytracing(all);
+	"./map_texture_11.xpm", &(all->i_sl), &all->i_bpp))))
+		ft_kill("Texture error");
+	all->i_tex = mlx_get_data_addr(all->env->img, &all->i_bpp, &all->naz, &all->i_end);
+	// while (i < 999)
+	// {
+	// 	j = 0;
+	// 	while (j < 999)
+	// 	{
+			// all->env->data[(i + j * WIDTH) * 4] = 0 * value;
+			// all->env->data[(i + j * WIDTH) * 4 + 1] = 0.394151 * value;
+			// all->env->data[(i + j * WIDTH) * 4 + 2] = 1 * value;
+			all->i_tex[(500 + 500 * WIDTH) * 4] = 1 * value;
+			all->i_tex[(500 + 500 * WIDTH) * 4 + 1] = 1 * value;
+			all->i_tex[(500 + 500 * WIDTH) * 4 + 2] = 1 * value;
+			// j++;
+		// }
+		// i++;
+	// }
+	// all->camera = init_cam(0, 0, -(double)WIDTH);
+	// raytracing(all);
+	// mlx_put_image_to_window(all->env->mlx, all->env->win, tex, 0, 0);
 	mlx_put_image_to_window(all->env->mlx, all->env->win, all->env->img, 0, 0);
 	mlx_hook(all->env->win, 17, (1L << 17), proper_exit, &all);
 	mlx_hook(all->env->win, 2, (1L << 0), key_press, &all);
