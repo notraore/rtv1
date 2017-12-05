@@ -46,17 +46,17 @@ double		dot_product(t_v *a, t_v *b)
 
 double		vector_len(t_v *len)
 {
-	return (sqrtf(pow(len->x, 2) + pow(len->y, 2) + pow(len->z, 2)));
+	return (sqrt(len->x * len->x + len->y * len->y + len->z * len->z));
 }
 
 double		vector_colineaire(double a, double b, double c)
 {
-	return (pow(a, 2) + pow(b, 2) + pow(c, 2));
+	return (a * a + b * b + c * c);
 }
 
 double		vector_unitaire(double a, double b)
 {
 	if (a < 0)
-		return (-(sqrt(a) / sqrtf(b)));
-	return (sqrt(a) / sqrtf(b));
+		return (-(sqrt(a) / sqrt(b)));
+	return (sqrt(a) / sqrt(b));
 }

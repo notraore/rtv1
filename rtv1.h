@@ -110,6 +110,8 @@ struct						s_all
 	t_obj					*plan;
 	t_color					clr;
 	t_v						normal;
+	double					u;
+	double					v;
 	t_v						hit;
 	t_mlx					*env;
 	t_cam					camera;
@@ -124,6 +126,7 @@ struct						s_all
 */
 	int						fd;
 	int						value;
+	int						flag;
 	char					*line;
 	char					**tmp;
 	t_obj					*o_tmp;
@@ -136,6 +139,10 @@ struct						s_all
 
 	int						x;
 	int						y;
+	int						i;
+	int						j;
+	double					angle;
+	int						texture;
 	int						ind;
 	bool					tof;
 	double					t;
