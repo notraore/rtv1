@@ -1,5 +1,8 @@
 # rtv1
 
+usage : `make`
+`./rt scenes/[your map]`
+
 Mouvement :<br />
 - Translate : W, A, S, D<br />
 - Rotate : UP, LEFT, DOWN, RIGHT<br />
@@ -11,11 +14,6 @@ Introducing to :
 - Multi-light spot
 - Shadow
 - Shiny objects
-		
-Usage :
-`make`
-
-`./rtv1 scenes/[your scene]`
 
 Here is some footage of the program :<br />
 
