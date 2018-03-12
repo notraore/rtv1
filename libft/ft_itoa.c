@@ -3,76 +3,73 @@
 /*                                                        :::      ::::::::   */
 /*   ft_itoa.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/12 12:43:56 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/12 12:43:57 by notraore         ###   ########.fr       */
+/*   Created: 2017/05/02 15:14:28 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/05/07 22:02:22 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
-static char				*ft_nb_to_str(int n, char *str, unsigned int pos)
+static char		*n_is_positive(int n)
 {
-	unsigned int	nb;
+	int		len;
+	int		tmp;
+	char	*str;
 
-	pos--;
-	if (n < 0)
+	len = 0;
+	tmp = n;
+	while (tmp > 0)
 	{
-		nb = -n;
-		str[0] = '-';
+		tmp = tmp / 10;
+		len++;
 	}
-	else
-		nb = n;
-	if (nb >= 10)
+	if (!(str = (char*)malloc(sizeof(char) * (len + 1))))
+		return (NULL);
+	str[len] = '\0';
+	while (len--)
 	{
-		ft_nb_to_str((nb / 10), str, pos);
-		str[pos] = ((nb % 10) + '0');
+		str[len] = n % 10 + '0';
+		n = n / 10;
 	}
-	else
-		str[pos] = (nb + '0');
 	return (str);
 }
 
-static unsigned int		ft_lennbr(int n)
+static char		*n_is_negative(int n)
 {
-	unsigned int	count;
-	unsigned int	nb;
+	int		len;
+	int		tmp;
+	char	*str;
 
-	count = 0;
-	if (n < 0)
+	len = 1;
+	n = -n;
+	tmp = n;
+	while (tmp > 0)
 	{
-		nb = (unsigned int)-n;
-		count++;
+		tmp = tmp / 10;
+		len++;
 	}
-	else
-		nb = (unsigned int)n;
-	while (nb > 0)
+	if (!(str = (char*)malloc(sizeof(char) * (len + 1))))
+		return (NULL);
+	str[len] = '\0';
+	while (len--)
 	{
-		nb = nb / 10;
-		count++;
+		str[len] = n % 10 + '0';
+		n = n / 10;
 	}
-	return (count);
+	str[0] = '-';
+	return (str);
 }
 
-char					*ft_itoa(int n)
+char			*ft_itoa(int n)
 {
-	unsigned int	len;
-	char			*str;
-
-	len = ft_lennbr(n);
+	if (n == -2147483648)
+		return (ft_strdup("-2147483648"));
 	if (n == 0)
-	{
-		if (!(str = ft_strnew(1)))
-			return (NULL);
-		str[0] = '0';
-	}
+		return (ft_strdup("0"));
+	else if (n < 0)
+		return (n_is_negative(n));
 	else
-	{
-		if (!(str = ft_strnew(len)))
-			return (NULL);
-		str = ft_nb_to_str(n, str, len);
-	}
-	free(str);
-	return (str);
+		return (n_is_positive(n));
 }

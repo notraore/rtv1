@@ -3,29 +3,35 @@
 /*                                                        :::      ::::::::   */
 /*   ft_memccpy.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/12 12:58:39 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/12 12:58:41 by notraore         ###   ########.fr       */
+/*   Created: 2017/04/16 21:57:22 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/04/24 14:07:30 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
-void	*ft_memccpy(void *s1, const void *s2, int c, size_t n)
+void	*ft_memccpy(void *restrict dst,
+const void *restrict src, int c, size_t n)
 {
-	unsigned char			*tmp1;
-	unsigned const char		*tmp2;
-	size_t					i;
+	unsigned char	*dest;
+	unsigned char	*str;
+	size_t			i;
+	unsigned char	a;
 
-	tmp1 = (unsigned char *)s1;
-	tmp2 = (unsigned const char *)s2;
 	i = 0;
-	c = (unsigned char)c;
+	a = (unsigned char)c;
+	dest = (unsigned char*)dst;
+	str = (unsigned char*)src;
 	while (i < n)
 	{
-		if ((*tmp1++ = *tmp2++) == c)
-			return (tmp1);
+		dest[i] = str[i];
+		if (str[i] == a)
+		{
+			i++;
+			return (dst + i);
+		}
 		i++;
 	}
 	return (NULL);

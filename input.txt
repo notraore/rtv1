@@ -1,0 +1,11 @@
+-W -> Forward
+-S -> Back
+-A -> Straff left
+-D -> Straffer right
+-Q -> Lift up
+-E -> Lift down
+-Z -> Lean left
+-X -> Incliner right
+-R -> Toggle Anti-Aliasing
+Spape -> Toggle pixelization (recommanded)
+Use the directional arrow to look right, up, left and right.

@@ -3,28 +3,24 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strequ.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/12 12:46:35 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/12 12:46:40 by notraore         ###   ########.fr       */
+/*   Created: 2017/04/30 19:43:46 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/04/30 22:36:27 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
 int		ft_strequ(char const *s1, char const *s2)
 {
-	char *str1;
-	char *str2;
-
-	str1 = (char *)s1;
-	str2 = (char *)s2;
-	if (str1 && str2)
+	while (*s1 == *s2 && *s1 && *s2)
 	{
-		if (ft_strcmp(str1, str2) == 0)
-			return (1);
-		else
-			return (0);
+		s1++;
+		s2++;
 	}
-	return (0);
+	if (*s1 != *s2)
+		return (0);
+	else
+		return (1);
 }

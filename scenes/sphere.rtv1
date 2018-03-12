@@ -1,0 +1,8 @@
+| Type | window size |      camera origin      |
+
+   EN      1400 1200          0     0  -1400
+
+| Type | origin or center or point | radius | tangent |    normal   |     color    | brightness | id |
+
+   SP         0      0   -400          100                             0.2 0.2 0.8        1        0
+   LI       400      0   -900                                          0.7 0.7 0.7                 0

@@ -3,44 +3,77 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: nobila <nobila@student.42.fr>              +#+  +:+       +#+         #
+#    By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2017/05/22 16:56:22 by notraore          #+#    #+#              #
-#    Updated: 2017/11/25 23:23:33 by nobila           ###   ########.fr        #
+#    Created: 2017/06/17 16:13:57 by dguy-caz          #+#    #+#              #
+#    Updated: 2017/06/17 19:49:33 by dguy-caz         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME=rtv1
-CC=gcc
-SRC=srcs/main.c srcs/error.c srcs/keyboard.c srcs/init.c srcs/vector_op.c \
-srcs/vector_op_scal.c
-OBJ=main.o error.o keyboard.o init.o vector_op.o vector_op_scal.o
+NAME		= 	rtv1
 
-ifeq ($(DEBUG), yes)
-FLAGS=-g3 -fsanitize=address
-else
-FLAGS=-Wall -Wextra -Werror
-endif
-LIB=-L ./libft -lft
-MLX=-L ./miniLibx_macos -lmlx -framework OpenGL -framework AppKit
+SRCS		= 	srcs/main.c \
+				srcs/ray_tracer.c \
+				srcs/get_color.c \
+				srcs/user_interactions.c \
+				srcs/intersections.c \
+				srcs/light_blocked.c \
+				srcs/parsing.c \
+				srcs/camera.c \
+				srcs/matrix_rotation_1.c \
+				srcs/matrix_rotation_2.c \
+				srcs/matrix_translation.c \
+				srcs/pixelisation.c \
+				srcs/anti_aliasing.c \
+				srcs/register_obj.c \
+				srcs/vectors_op_1.c \
+				srcs/vectors_op_2.c \
+				srcs/vectors_op_3.c \
+				srcs/colors_op_1.c \
+				srcs/colors_op_2.c \
+				srcs/archive_objects.c \
+				srcs/create_objects.c \
+				srcs/errors.c \
 
-all: $(NAME)
+OBJS		= 	$(patsubst srcs/%.c,objs/%.o,$(SRCS))
 
-$(NAME): $(OBJ)
-	@ echo "\033[92m\t\t\t---> ✓ libft created. ✓ <---\033[0m"
-	@ make -C ./libft
-	@ echo "\033[92m\t---> ✓ rtv1 program has been successfully created. ✓ <---\033[0m"
-	@ $(CC) $(FLAGS) $(OBJ) -o $(NAME) $(MLX) $(LIB)
-$(OBJ): $(SRC)
-	@ $(CC) $(FLAGS) -c $(SRC)
-clean:
-	@ echo "\033[1;33m---> All .o files cleared. ✓ <---\033[0m"
-	@ rm -f $(OBJ)
-	@ make -C ./libft clean
-fclean: clean
-	@ echo "\033[1;33m---> Everything has been cleared. ✓ <---\033[2;00m"
-	@ rm -f $(NAME)
-	@ make -C ./libft fclean
-re: fclean all
+CC			= 	gcc
+CFLAGS		= 	-Wall -Wextra -Werror
+INC			= 	-I./includes/
 
-.PHONY: clean, fclean, re
+LIBFT		= 	./libft/libft.a
+LIBFTINC	= 	-I./libft/includes/
+LIBFTLINK	= 	-L./libft -lft
+
+MLX			= 	./minilibx_macos/libmlx.a
+MLXINC		= 	-I./minilibx_macos/
+MLXLNK	= -L./minilibx_macos -framework OpenGL -framework AppKit -Iminilibx_macos
+
+.SILENT:
+
+all:		$(NAME)
+
+$(NAME): 	$(OBJS)
+			make -C ./libft
+			make -C ./minilibx_macos
+			$(CC) $(CFLAGS) $(INC) $(LIBFT) $(LIBFTLINK) $(MLXLNK) $(MLX) -o $@ $^
+			echo "\033[92m\n---> RTv1 program created ✓\n\033[0m"
+
+objs/%.o: 	srcs/%.c
+			mkdir -p objs
+		 	$(CC) $(CFLAGS) $(INC) $(LIBFTINC) $(MLXINC) -c $< -o $@
+
+clean:		
+			/bin/rm -rf objs/
+			make -C libft/ clean
+			make -C minilibx_macos/ clean
+			echo "\033[1;33m\n---> All .o files cleared\033[0m \033[92m✓\n\033[0m"
+
+fclean:		clean
+			/bin/rm -f $(NAME)
+			make -C libft/ fclean
+			echo "\033[1;33m---> Everything cleared\033[2;00m \033[92m✓\n\033[0m"
+
+re : fclean all
+
+.PHONY: all, clean, fclean, re

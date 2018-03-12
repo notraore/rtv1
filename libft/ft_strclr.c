@@ -3,28 +3,20 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strclr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/12 12:46:07 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/12 12:46:12 by notraore         ###   ########.fr       */
+/*   Created: 2017/04/30 18:15:30 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/04/30 22:36:10 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
 void	ft_strclr(char *s)
 {
-	char			*str;
-	unsigned int	count;
-
-	str = (char *)s;
-	count = 0;
-	if (str)
+	while (*s != '\0')
 	{
-		while (str[count])
-		{
-			str[count] = '\0';
-			count++;
-		}
+		*s = '\0';
+		s++;
 	}
 }

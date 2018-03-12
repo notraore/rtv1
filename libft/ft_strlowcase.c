@@ -3,25 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strlowcase.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/12 16:56:50 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/12 16:57:06 by notraore         ###   ########.fr       */
+/*   Created: 2017/03/16 14:34:59 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/05/04 19:40:35 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
-char	*ft_strlowcase(char *str)
+char	*ft_strlowcase(char *s)
 {
-	int i;
+	int	i;
 
 	i = 0;
-	while (str[i] != '\0')
+	while (s[i] != '\0')
 	{
-		if (str[i] >= 'A' && str[i] <= 'Z')
-			str[i] = str[i] + 32;
+		if (s[i] >= 65 && s[i] <= 90)
+			s[i] = s[i] + 32;
 		i++;
 	}
-	return (str);
+	return (s);
 }

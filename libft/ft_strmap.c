@@ -3,34 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strmap.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/12 12:47:05 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/12 12:48:01 by notraore         ###   ########.fr       */
+/*   Created: 2017/04/30 18:52:07 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/04/30 22:37:18 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
 char	*ft_strmap(char const *s, char (*f)(char))
 {
-	char			*str;
-	char			*str_new;
-	unsigned int	count;
+	char	*dest;
+	size_t	i;
 
-	str = (char *)s;
-	if (str && f)
+	if (!(dest = (char*)malloc(sizeof(char) * ft_strlen((char*)s) + 1)))
+		return (NULL);
+	i = 0;
+	while (*s != '\0')
 	{
-		count = 0;
-		if (!(str_new = malloc(ft_strlen(str) + 1)))
-			return (NULL);
-		while (str[count])
-		{
-			str_new[count] = f(str[count]);
-			count++;
-		}
-		str_new[count] = '\0';
-		return (str_new);
+		dest[i] = (*f)(*s);
+		i++;
+		s++;
 	}
-	return (NULL);
+	dest[i] = '\0';
+	return (dest);
 }

@@ -3,459 +3,82 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nobila <nobila@student.42.fr>              +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/09/20 22:07:14 by notraore          #+#    #+#             */
-/*   Updated: 2017/12/02 23:52:41 by nobila           ###   ########.fr       */
+/*   Created: 2017/06/04 20:12:37 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/06/16 19:50:51 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../rtv1.h"
+#include "rtv1.h"
 
-t_v			create_vector(double x, double y, double z)
+void		init_transformations(t_datas *d)
 {
-	t_v			ret;
-
-	ret.x = x;
-	ret.y = y;
-	ret.z = z;
-	return (ret);
+	d->move_x = 0;
+	d->move_y = 0;
+	d->move_z = 0;
+	d->rotate_x = 0;
+	d->rotate_y = 0;
+	d->rotate_z = 0;
+	d->pixelize = 0;
 }
 
-t_v			create_default_vector(void)
+void		display_window(t_datas *d, t_object *object)
 {
-	t_v		new;
-
-	new.x = 0;
-	new.y = 0;
-	new.z = 0;
-
-	return (new);
+	if (!(d->objects = object))
+		ft_kill("Assignation error : d->object in main.c");
+	if (!(d->mlx.mlx_ptr = mlx_init()))
+		ft_kill("mlx_init error");
+	if (!(d->mlx.win_ptr = mlx_new_window(d->mlx.mlx_ptr, d->window_width,
+		d->window_height, "RTv1")))
+		ft_kill("mlx_new_window error");
+	if (!(d->mlx.img_ptr = mlx_new_image(d->mlx.mlx_ptr, d->window_width,
+		d->window_height)))
+		ft_kill("mlx_new_image error");
+	if (!(d->mlx.data = (unsigned char*)mlx_get_data_addr(d->mlx.img_ptr,
+		&d->mlx.bpp, &d->mlx.l_size, &d->mlx.endian)))
+		ft_kill("mlx_get_data_addr error");
+	init_transformations(d);
+	init_camera(d);
+	camera_transformation(d);
+	ray_tracer(d);
+	mlx_hook(d->mlx.win_ptr, 2, (1L << 0), key_functions, d);
+	mlx_hook(d->mlx.win_ptr, 17, (1L << 17), proper_exit, d);
+	mlx_put_image_to_window(d->mlx.mlx_ptr, d->mlx.win_ptr,
+		d->mlx.img_ptr, 0, 0);
+	mlx_loop(d->mlx.mlx_ptr);
+	mlx_destroy_window(d->mlx.mlx_ptr, d->mlx.win_ptr);
 }
 
-t_cam		init_cam(double x, double y, double z)
+int			check_args(char *argv)
 {
-	t_cam		cam;
+	int i;
 
-	cam.cam_pos = create_vector(x, y, z);
-	cam.vp = create_default_vector();
-	return (cam);
-}
-
-t_ray		init_ray(t_all *all, int x1, int y1)
-{
-	t_ray		ray;
-
-	ray.pos = all->camera.cam_pos;
-	all->camera.vp.x = x1;
-	all->camera.vp.y = y1;
-	all->camera.vp.z = 0;
-	ray.dir.x = all->camera.vp.x - ray.pos.x;
-	ray.dir.y = all->camera.vp.y - ray.pos.y;
-	ray.dir.z = all->camera.vp.z - ray.pos.z;
-
-	all->vecdirx.x = 1;
-	all->vecdirx.y = 0;
-	all->vecdirx.z = 0;
-
-	all->vecdiry.x = 0;
-	all->vecdiry.y = 1;
-	all->vecdiry.z = 0;
-
-	all->vecdirz.x = 0;
-	all->vecdirz.y = 0;
-	all->vecdirz.z = 1;
-	return (ray);
-}
-
-void		init_lst(t_all *all)
-{
-	all->o_tmp = all->head;
-	all->lght = all->head;
-	all->plan = all->head;
-	while (all->lght->type != 'L')
-		all->lght = all->lght->next;
-	while (all->plan->type != 'P')
-		all->plan = all->plan->next;
-}
-
-t_color		create_color(double r, double g, double b, double a)
-{
-	t_color		clr;
-
-	clr.r = r;
-	clr.g = g;
-	clr.b = b;
-	clr.a = a;
-	return (clr);
-}
-
-bool		cast_plan(t_all *all, t_ray *ray, t_obj *plan)
-{
-	t_v			o;
-	double		a;
-	double		b;
-	double		s;
-
-	o = vector_sub(&plan->pos, &all->camera.cam_pos);
-	a = dot_product(&all->vecdiry, &o);
-	b = dot_product(&all->vecdiry, &ray->dir);
-	s = -(a / b);
-	if (a == 0 || s < 0)
-		return (false);
-	all->t = s;
-	return (true);
-}
-
-bool		cast_sphere(t_all *all, t_ray *ray, t_obj *obj)
-{
-	double		a;
-	double		b;
-	double		c;
-	t_v			o;
-
-	o = vector_sub(&obj->pos, &ray->pos);
-	a = dot_product(&ray->dir, &ray->dir);
-	b = 2 * dot_product(&ray->dir, &o);
-	c = dot_product(&o, &o) - obj->r * obj->r;
-	all->delta = b * b - 4 * a * c;
-	if (all->delta < 0)
-		return (false);
-	if (all->delta == 0)
-		all->delta = -b;
-	if (all->delta > 0)
+	i = 0;
+	while (argv[i])
 	{
-		all->t1 = (-b + sqrt(all->delta)) / (2 * a);
-		all->t2 = (-b - sqrt(all->delta)) / (2 * a);
-		all->t = all->t1 >= all->t2 ? all->t2 : all->t1;
-		return (true);
+		if (argv[i] == '.' && argv[i + 1] == 'r' && argv[i + 2] == 't'
+		&& argv[i + 3] == 'v' && argv[i + 4] == '1')
+			return (1);
+		i++;
 	}
-	return (false);
-}
-
-bool		cast_shadow(t_all *all)
-{
-	t_obj	*temp;
-
-	temp = all->head;
-	while (temp)
-	{
-		if (cast_sphere(all, &all->shadow, temp) == true)
-			return (true);
-		temp = temp->next;
-	}
-	temp = all->head;
-	return (false);
-}
-
-t_color		cast_light_plan(t_all *all, t_obj *plan, t_obj *light)
-{
-	t_color		clr;
-	t_v			d;
-	double		angle;
-	int			carre;
-
-	carre = (int)floor(all->hit.x) + (int)floor(all->hit.z);
-	all->hit = vector_mult_scal(&all->ray.dir, all->t);
-	all->hit = vector_add(&all->ray.pos, &all->hit);
-	light->ray.dir = vector_sub(&light->ray.pos, &all->hit);
-	light->ray.dir = vector_normalize(&light->ray.dir);
-	d = vector_mult_scal(&light->ray.dir, (-1.0));
-	angle = dot_product(&d, &all->vecdiry);
-	if (angle <= 0)
-		return (create_color(0, 0, 0, 0));
-	all->shadow.pos = all->hit;
-	all->shadow.dir = vector_sub(&light->pos, &all->hit);
-	if (cast_shadow(all) == true)
-		return (create_color(0, 0, 0, 0));
-	if ((carre % 2) == 0)
-	{
-		clr.r = 0 * light->clr.r * angle;
-		clr.g = 0 * light->clr.g * angle;
-		clr.b = 0 * light->clr.b * angle;
-		return (clr);
-	}
-	clr.r = plan->clr.r * light->clr.r * angle;
-	clr.g = plan->clr.g * light->clr.g * angle;
-	clr.b = plan->clr.b * light->clr.b * angle;
-	return (clr);
-}
-
-void		pixel_puts(t_color *clr, t_all *all)
-{
-	if (all->flag == 0)
-	{	
-		all->env->data[(all->x + all->y * WIDTH) * 4] = clr->b * 255.0;
-		all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = clr->g * 255.0;
-		all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = clr->r * 255.0;
-		all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = clr->a * 255.0;
-	}
-	else
-	{
-		all->env->data[(all->x + all->y * WIDTH) * 4] = clr->b;
-		all->env->data[(all->x + all->y * WIDTH) * 4 + 1] = clr->g;
-		all->env->data[(all->x + all->y * WIDTH) * 4 + 2] = clr->r;
-		all->env->data[(all->x + all->y * WIDTH) * 4 + 3] = clr->a;	
-	}
-}
-
-void	print_tab(t_obj *some)
-{
-	t_obj	*tmp;
-
-	tmp = some;
-	if (tmp)
-		while (tmp)
-		{
-			printf("tmp->type = %c | ", tmp->type);
-			printf("tmp->pos.x = %f | ", tmp->pos.x);
-			printf("tmp->pos.y = %f | ", tmp->pos.y);
-			printf("tmp->pos.z = %f | ", tmp->pos.z);
-			printf("tmp->r = %f | ", tmp->r);
-			tmp = tmp->next;
-		}
-}
-
-t_color		get_texture_info(char *tex, t_all *all)
-{
-	int			nb;
-	t_color		clr;
-
-	nb = (all->j * 4) + (all->i * all->i_sl * 4);
-	clr.b = tex[nb];
-	clr.g = tex[nb + 1];
-	clr.r = tex[nb + 2];
-	return (clr);
-}
-
-void		wrap_sphere(t_all *all)
-{
-	t_v			vp;
-	t_v			vn;
-	t_v			ve;
-	double		phi;
-	double		theta;
-
-	all->hit = vector_mult_scal(&all->ray.dir, all->t);
-	all->hit = vector_add(&all->ray.pos, &all->hit);
-	vn = create_vector(0., 1., 0.);
-	ve = create_vector(1., 0., 0.);
-	vp = vector_sub(&all->hit, &all->o_tmp->pos);
-	vp = vector_normalize(&vp);
-	phi = acos(-dot_product(&vn, &vp));
-	all->v = phi / PI;
-	theta = (acos(dot_product(&vp, &ve) / sin(phi))) / (2.0 * PI);
-	t_v cross = cross_product(&vn, &ve);
-	if (dot_product(&cross, &vp) > 0.0)
-		all->u = theta;
-	else
-		all->u = 1.0 - theta;
-}
-
-t_color		cast_light(t_all *all, t_obj *tmp, t_obj *light)
-{
-	t_color		clr;
-	t_v			d;
-	all->hit = vector_mult_scal(&all->ray.dir, all->t);
-	all->hit = vector_add(&all->ray.pos, &all->hit);
-	all->normal = vector_sub(&tmp->pos, &all->hit);
-	all->normal = vector_div_scal(&all->normal, tmp->r);
-	light->ray.dir = vector_sub(&light->ray.pos, &all->hit);
-	light->ray.dir = vector_normalize(&light->ray.dir);
-	d = vector_mult_scal(&light->ray.dir, (-1.0));
-	all->angle = dot_product(&d, &all->normal);
-	if (all->angle <= 0)
-		return (create_color(0, 0, 0, 0));
-	clr.r = tmp->clr.r * light->clr.r * all->angle;
-	clr.g = tmp->clr.g * light->clr.g * all->angle;
-	clr.b = tmp->clr.b * light->clr.b * all->angle;
-	return (clr);
-}
-
-void		cast_something(t_all *all)
-{
-	all->clr = create_color(0.01, 0.01, 0.01, 0);
-	while (all->o_tmp)
-	{
-		if (cast_plan(all, &all->ray, all->plan) == true && all->dist > all->t)
-		{
-			all->dist = all->t;
-			
-			all->clr = cast_light_plan(all, all->plan, all->lght);
-		}
-		if (cast_sphere(all, &all->ray, all->o_tmp) == true && all->dist > all->t)
-		{
-			all->dist = all->t;
-			if (all->texture == 1)
-			{
-				wrap_sphere(all);
-				all->i = (int)(all->v * 2160);
-				all->j = (int)(all->u * all->i_sl);
-				all->clr = get_texture_info(all->i_tex, all);
-				all->flag = 1;
-			}
-			else
-				all->clr = cast_light(all, all->o_tmp, all->lght);
-		}
-		all->o_tmp = all->o_tmp->next;
-	}
-}
-
-void		raytracing(t_all *all)
-{
-	int			x1;
-	int			y1;
-
-	all->y = 0;
-	init_lst(all);
-	y1 = (HEIGHT / 2);
-	while (all->y < HEIGHT)
-	{
-		all->x = 0;
-		x1 = -(WIDTH / 2);
-		while (all->x < WIDTH)
-		{
-			all->dist = 200000;
-			all->ray = init_ray(all, x1, y1);
-			cast_something(all);
-			if (all->x > 0 && all->x < WIDTH && all->y < HEIGHT && all->y > 0)
-				pixel_puts(&all->clr, all);
-			all->x++;
-			x1++;
-			all->flag = 0;
-			all->o_tmp = all->head;
-		}
-		all->y++;
-		y1--;
-	}
-}
-
-t_obj		*create_plan(char **tmp)
-{
-	t_obj		*new;
-
-	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
-		return (NULL);
-	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
-	new->type = 'P';
-	new->r = 0;
-	return (new);
-}
-
-
-t_obj		*create_sphere(char **tmp)
-{
-	t_obj	*new;
-
-	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
-		return (NULL);
-	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	new->r = ft_atof(tmp[4]);
-	new->clr = create_color(ft_atof(tmp[5]), ft_atof(tmp[6]),
-	ft_atof(tmp[7]), ft_atof(tmp[8]));
-	new->type = 'S';
-	return (new);
-}
-
-static void		add_to_list(t_obj **obj, t_obj *new_obj)
-{
-	t_obj		*tmp;
-
-	if (!obj || !new_obj)
-		return ;
-	tmp = *obj;
-	new_obj->next = NULL;
-	if (!tmp)
-	{
-		*obj = new_obj;
-		return ;
-	}
-	while (tmp->next)
-		tmp = tmp->next;
-	tmp->next = new_obj;
-}
-
-t_obj		*create_spot(char **tmp)
-{
-	t_obj	*new;
-
-	if (!(new = (t_obj *)malloc(sizeof(t_obj))))
-		return (NULL);
-	new->pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	new->ray.pos = create_vector(ft_atof(tmp[1]), ft_atof(tmp[2]), ft_atof(tmp[3]));
-	new->clr = create_color(ft_atof(tmp[4]), ft_atof(tmp[5]), ft_atof(tmp[6]), ft_atof(tmp[7]));
-	new->r = 0;
-	new->type = 'L';
-	return (new);
-}
-
-t_obj		*get_scene(int fd, t_all *all)
-{
-	int		val;
-	t_obj	*new_obj;
-	t_obj	*obj;
-
-	obj = NULL;
-	while ((val = get_next_line(fd, &all->line)) == 1)
-	{
-		all->tmp = ft_strsplit(all->line, '\t');
-
-		if (all->tmp[0][0] == 'S')
-			new_obj = create_sphere(all->tmp);
-		if (all->tmp[0][0] == 'L')
-			new_obj = create_spot(all->tmp);
-		if (all->tmp[0][0] == 'P')
-			new_obj = create_plan(all->tmp);
-		add_to_list(&obj, new_obj);
-		free_tab(all->tmp);
-	}
-	if (!obj)
-		ft_kill("No scene found, sorry m8.");
-	return (obj);
-}
-
-int		get_pixel_clr(int x, int y, char *tex, int xpm_sl)
-{
-	int nb;
-	char clr[4];
-
-	nb = (x * 4) + (y * 4 * xpm_sl);
-	clr[0] = tex[nb];
-	clr[1] = tex[nb + 1];
-	clr[2] = tex[nb + 2];
-	clr[3] = tex[nb + 3];
-	return (*(int *)clr);
+	return (0);
 }
 
 int			main(int argc, char **argv)
 {
-	t_mlx		mlx;
-	t_all		*all;
-	void		*tex;
+	t_object	*object;
+	t_datas		d;
+	int			ret;
 
-	if (argc < 2)
-		ft_help();
-	(void)argv;
-	all = (t_all *)malloc(sizeof(t_all));
-	(!(all->fd = open(argv[1], O_RDONLY)) ? ft_kill("fuck") : 0);
-	all->texture = 1;
-	all->head = get_scene(all->fd, all);
-	all->env = &mlx;
-	all->env->mlx = mlx_init();
-	all->env->win = mlx_new_window(all->env->mlx, WIDTH, HEIGHT, "RTv1");
-	all->env->img = mlx_new_image(all->env->mlx, WIDTH, HEIGHT);
-	all->env->data = mlx_get_data_addr(all->env->img, &all->env->bpp,
-	&all->env->sl, &all->env->end);
-	if (!((tex = mlx_xpm_file_to_image(all->env->mlx,
-	"./earth.xpm", &(all->i_sl), &all->i_bpp))))
-		ft_kill("Texture error");
-	all->i_tex = mlx_get_data_addr(tex, &all->i_bpp, &all->naz, &all->i_end);
-	all->camera = init_cam(0, 0, -(double)WIDTH);
-	raytracing(all);
-	mlx_put_image_to_window(all->env->mlx, all->env->win, all->env->img, 0, 0);
-	mlx_hook(all->env->win, 17, (1L << 17), proper_exit, &all);
-	mlx_hook(all->env->win, 2, (1L << 0), key_press, &all);
-	mlx_loop(all->env->mlx);
+	if (argc != 2)
+		ft_print_err(argc);
+	if (!(object = (t_object*)ft_memalloc(sizeof(t_object))))
+		ft_kill("Malloc error : object refereced in main.c");
+	if (!(check_args(argv[1])))
+		ft_kill("Bad file, check your scnene name");
+	if (!(ret = parsing(&d, object, argv[1])))
+		ft_kill("parsing error");
+	display_window(&d, object);
 	return (0);
 }

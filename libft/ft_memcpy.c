@@ -3,28 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   ft_memcpy.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/13 14:50:17 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/13 14:50:17 by notraore         ###   ########.fr       */
+/*   Created: 2017/04/16 21:35:03 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/05/06 03:24:52 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
-void	*ft_memcpy(void *dst, const void *src, size_t n)
+void	*ft_memcpy(void *restrict dst, const void *restrict src, size_t n)
 {
-	unsigned char			*tmp_dest;
-	unsigned const char		*tmp_src;
-	size_t					count;
+	unsigned char	*dest;
+	unsigned char	*str;
+	size_t			i;
 
-	tmp_dest = (unsigned char*)dst;
-	tmp_src = (unsigned const char*)src;
-	count = 0;
-	while (count < n)
+	i = 0;
+	dest = (unsigned char*)dst;
+	str = (unsigned char*)src;
+	while (i < n)
 	{
-		tmp_dest[count] = tmp_src[count];
-		count++;
+		dest[i] = str[i];
+		i++;
 	}
-	return ((char*)dst);
+	return (dst);
 }

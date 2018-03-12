@@ -3,38 +3,38 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strtrim.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/13 14:49:11 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/13 14:49:13 by notraore         ###   ########.fr       */
+/*   Created: 2017/04/30 22:55:32 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/05/02 23:57:23 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
 char	*ft_strtrim(char const *s)
 {
-	int		i;
-	int		len;
-	char	*str;
+	char	*dest;
+	size_t	i;
+	size_t	len;
+	size_t	j;
 
-	if (!(s))
-		return (NULL);
+	i = 0;
 	len = ft_strlen(s);
-	while (ft_isspace(s[len - 1]))
+	while (s[len - 1] == ' ' || s[len - 1] == '\n' || s[len - 1] == '\t')
 		len--;
-	i = -1;
-	while (ft_isspace(s[++i]))
+	while (s[i] == ' ' || s[i] == '\n' || s[i] == '\t')
+	{
+		i++;
 		len--;
-	if (len <= 0)
-		len = 0;
-	str = (char*)ft_memalloc(sizeof(char) * (len + 1));
-	if (!(str))
+		if (s[i] == '\0')
+			return ("\0");
+	}
+	if (!(dest = ft_strnew(len)))
 		return (NULL);
-	s = s + i;
-	i = -1;
-	while (++i < len)
-		str[i] = *s++;
-	str[i] = '\0';
-	return (str);
+	j = 0;
+	while (j < len)
+		dest[j++] = s[i++];
+	dest[j] = '\0';
+	return (dest);
 }

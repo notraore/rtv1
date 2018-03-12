@@ -3,26 +3,39 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strsplit.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/12 12:48:29 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/12 12:48:40 by notraore         ###   ########.fr       */
+/*   Created: 2017/05/02 23:10:15 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/05/05 01:31:28 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
-char	**ft_strsplit(char const *s, char c)
+char			**ft_strsplit(char const *s, char c)
 {
-	int		nb;
 	char	**tab;
+	int		i;
+	int		j;
 
-	if (!s || !c)
+	j = 0;
+	if (!(tab = (char**)malloc(sizeof(char*) * (ft_nbwords(s, c) + 1))))
 		return (NULL);
-	nb = ft_strcount(s, c);
-	if (!(tab = ft_memalloc(sizeof(char *) * (nb + 1))))
-		return (NULL);
-	tab = ft_split(s, c, tab);
-	tab[nb] = NULL;
+	while (*s)
+	{
+		if (*s == c)
+			s++;
+		else if (*s != c)
+		{
+			i = 0;
+			if (!(tab[j] =
+			(char*)malloc(sizeof(char) * (ft_lenwords(s, c) + 1))))
+				return (NULL);
+			while (*s && *s != c)
+				tab[j][i++] = *s++;
+			tab[j++][i] = '\0';
+		}
+	}
+	tab[j] = 0;
 	return (tab);
 }

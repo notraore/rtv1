@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_toupper.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/12 15:32:27 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/12 15:32:28 by notraore         ###   ########.fr       */
+/*   Created: 2017/04/16 17:20:55 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/04/16 20:34:24 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
 int		ft_toupper(int c)
 {

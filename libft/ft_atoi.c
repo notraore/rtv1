@@ -3,36 +3,39 @@
 /*                                                        :::      ::::::::   */
 /*   ft_atoi.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: dguy-caz <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/04/10 19:24:18 by notraore          #+#    #+#             */
-/*   Updated: 2017/04/10 19:26:28 by notraore         ###   ########.fr       */
+/*   Created: 2017/04/13 17:59:20 by dguy-caz          #+#    #+#             */
+/*   Updated: 2017/04/24 17:13:40 by dguy-caz         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "./includes/libft.h"
 
 int		ft_atoi(const char *str)
 {
-	int i;
-	int j;
-	int negatif;
+	size_t	negative;
+	size_t	i;
+	int		res;
 
+	negative = 0;
 	i = 0;
-	j = 0;
-	negatif = 1;
-	while (ft_isspace(str[i]) == 1)
-		str++;
-	if (str[i] == '+' || str[i] == '-')
+	res = 0;
+	while (str[i] == ' ' || (str[i] >= 9 && str[i] <= 13))
+		i++;
+	if (str[i] == '-' || str[i] == '+')
 	{
 		if (str[i] == '-')
-			negatif = -1;
+			negative = 1;
 		i++;
 	}
-	while (str[i] >= '0' && str[i] <= '9')
+	while (str[i] != '\0' && str[i] >= '0' && str[i] <= '9')
 	{
-		j = j * 10 + (str[i] - '0');
+		res = res * 10;
+		res = res + str[i] - '0';
 		i++;
 	}
-	return (j * negatif);
+	if (negative == 1)
+		return (-res);
+	return (res);
 }
