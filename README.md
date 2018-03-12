@@ -1,7 +1,7 @@
 # rtv1
 
-usage : `make`
-`./rt scenes/[your map]`
+usage : `make`<br />
+`./rt scenes/[your map]`<br />
 
 Mouvement :<br />
 - Translate : W, A, S, D<br />
