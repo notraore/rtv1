@@ -12,6 +12,11 @@ Introducing to :
 - Shadow
 - Shiny objects
 		
+Usage :
+`make`
+
+`./rtv1 scenes/[your scene]`
+
 Here is some footage of the program :<br />
 
 ![screen shot 2018-03-12 at 4 37 33 pm](https://user-images.githubusercontent.com/27351943/37294051-49b59726-2615-11e8-821a-c853453061fb.png)
